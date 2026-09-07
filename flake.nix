@@ -18,7 +18,7 @@
 
       package = pkgs.stdenv.mkDerivation {
         pname = "antigravity-superpowers";
-        version = "0.3.0";
+        version = "0.4.0";
         src = self;
 
         nativeBuildInputs = [pkgs.makeWrapper];

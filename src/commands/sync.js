@@ -1,4 +1,4 @@
-import { access, cp, mkdir, readdir, lstat, rm } from "node:fs/promises";
+import { access, cp, mkdir, readdir, lstat, rm, chmod } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join, resolve } from "node:path";
@@ -17,21 +17,44 @@ async function exists(path) {
   }
 }
 
+async function makeWritable(targetPath) {
+  try {
+    const s = await lstat(targetPath);
+    if (s.isDirectory()) {
+      await chmod(targetPath, 0o755).catch(() => {});
+      const entries = await readdir(targetPath);
+      for (const entry of entries) {
+        await makeWritable(join(targetPath, entry));
+      }
+    } else {
+      await chmod(targetPath, 0o644).catch(() => {});
+    }
+  } catch {
+    // ignore
+  }
+}
+
 async function copyDirectoryOverwritingSymlinks(src, dest) {
   await mkdir(dest, { recursive: true });
+  await chmod(dest, 0o755).catch(() => {});
   const entries = await readdir(src, { withFileTypes: true });
   for (const entry of entries) {
     const srcPath = join(src, entry.name);
     const destPath = join(dest, entry.name);
     try {
       const destStat = await lstat(destPath);
-      if (destStat.isSymbolicLink() || (destStat.isDirectory() && entry.isDirectory())) {
+      if (destStat.isDirectory()) {
+        await makeWritable(destPath);
         await rm(destPath, { recursive: true, force: true });
+      } else if (destStat.isSymbolicLink() || destStat.isFile()) {
+        await chmod(destPath, 0o644).catch(() => {});
+        await rm(destPath, { force: true });
       }
     } catch {
       // destPath does not exist, safe to copy
     }
     await cp(srcPath, destPath, { recursive: true });
+    await makeWritable(destPath);
   }
 }
 

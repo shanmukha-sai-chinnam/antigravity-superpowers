@@ -35,36 +35,39 @@ The original Superpowers repo doesn't support Antigravity, and there's no offici
 
 This is my attempt to bring the full Superpowers skill set to Antigravity — as close to the original as possible. The goal was never to fork and diverge; it was to translate just enough to make everything work natively on a different platform. Superpowers skills bring real structure to AI-assisted development — brainstorming before implementation, planning before coding, verification before completion claims — and that discipline shouldn't be locked to one platform.
 
-This port brings **14 skills** covering the full development lifecycle, updated for modern Antigravity 2.0:
+This port brings **21 skills** covering the full development lifecycle, updated for modern Antigravity 2.0:
 
 ---
 
 ## What's Included
 
-**18 skills** covering the full development lifecycle, Antigravity 2.0 swarms, and NixOS systems engineering:
+**21 skills** covering the full development lifecycle, Antigravity 2.0 swarms, MCP integrations, and NixOS systems engineering:
 
-| Skill                            | Category         | Description                                             |
-| -------------------------------- | ---------------- | ------------------------------------------------------- |
-| `brainstorming`                  | Process          | Structured exploration before committing to an approach |
-| `writing-plans`                  | Process          | Detailed, step-by-step implementation plans             |
-| `executing-plans`                | Execution        | Disciplined plan execution with progress tracking       |
-| `single-flow-task-execution`     | Execution        | Ordered task decomposition with review gates            |
-| `herdr`                          | Orchestration    | Terminal multiplexer & multi-agent swarms (Trio Flow)   |
-| `test-driven-development`        | Quality          | Write tests first, implement second                     |
-| `systematic-debugging`           | Debugging        | Root cause tracing with supporting techniques           |
-| `nixos-system-rebuild`           | NixOS / Systems  | Safe declarative rebuilds, diffs, and auto-rollback     |
-| `nix-flake-management`           | Nix / Packaging  | Flake authoring, input pinning, and devShells           |
-| `nix-derivation-debugging`       | Nix / Packaging  | Systematic stdenv phase and dynamic linker debugging    |
-| `nix-code-audit`                 | Nix / Linting    | Alejandra, Statix, Deadnix static validation pipeline   |
-| `requesting-code-review`         | Review           | Structured review flow with checklists                  |
-| `receiving-code-review`          | Review           | Handling feedback systematically                        |
-| `verification-before-completion` | Quality          | Prove it works before claiming it's done                |
-| `finishing-a-development-branch` | Git              | Clean branch wrap-up with workflow options              |
-| `using-git-worktrees`            | Git              | Parallel branch management                              |
-| `using-superpowers`              | Core             | Skill routing and session bootstrap                     |
-| `writing-skills`                 | Authoring        | Create new skills that follow the system's conventions  |
+| Skill                             | Category          | Description                                              |
+| --------------------------------- | ----------------- | -------------------------------------------------------- |
+| `brainstorming`                   | Process           | Structured exploration before committing to an approach  |
+| `writing-plans`                   | Process           | Detailed, step-by-step implementation plans              |
+| `executing-plans`                 | Execution         | Disciplined plan execution with progress tracking        |
+| `single-flow-task-execution`      | Execution         | Ordered task decomposition with review gates             |
+| `herdr`                           | Orchestration     | Terminal multiplexer & multi-agent swarms (Trio Flow)    |
+| `herdr-multi-agent-orchestration` | Orchestration     | Swarm roles (Architect, Implementer, Watcher) & IPC      |
+| `antigravity-mcp-integration`     | Protocol / Tools  | Model Context Protocol STDIO JSON-RPC server integration |
+| `continuous-codebase-watching`    | Verifier / Daemon | Sub-second linter, formatter, and test feedback          |
+| `test-driven-development`         | Quality           | Write tests first, implement second                      |
+| `systematic-debugging`            | Debugging         | Root cause tracing with supporting techniques            |
+| `nixos-system-rebuild`            | NixOS / Systems   | Safe declarative rebuilds, diffs, and auto-rollback      |
+| `nix-flake-management`            | Nix / Packaging   | Flake authoring, input pinning, and devShells            |
+| `nix-derivation-debugging`        | Nix / Packaging   | Systematic stdenv phase and dynamic linker debugging     |
+| `nix-code-audit`                  | Nix / Linting     | Alejandra, Statix, Deadnix static validation pipeline    |
+| `requesting-code-review`          | Review            | Structured review flow with checklists                   |
+| `receiving-code-review`           | Review            | Handling feedback systematically                         |
+| `verification-before-completion`  | Quality           | Prove it works before claiming it's done                 |
+| `finishing-a-development-branch`  | Git               | Clean branch wrap-up with workflow options               |
+| `using-git-worktrees`             | Git               | Parallel branch management                               |
+| `using-superpowers`               | Core              | Skill routing and session bootstrap                      |
+| `writing-skills`                  | Authoring         | Create new skills that follow the system's conventions   |
 
-Plus supporting infrastructure: declarative MCP server configurations (`mcp_config.json`), lifecycle automation hooks (`hooks.json`), workflows, rules (`workflow-discipline.md`), validation tests, and an `AGENTS.md` contract.
+Plus supporting infrastructure: native Model Context Protocol server (`antigravity-superpowers mcp serve`), Herdr swarm orchestration (`antigravity-superpowers swarm`), continuous codebase watcher (`antigravity-superpowers watch`), live model quota inspector (`antigravity-superpowers quota`), workspace presets (`antigravity-superpowers preset`), declarative MCP configurations (`mcp_config.json`), lifecycle automation hooks (`hooks.json`), workflows, rules (`workflow-discipline.md`), validation tests (118 checks), and an `AGENTS.md` contract.
 
 ---
 
@@ -94,16 +97,34 @@ nix develop github:shanmukha-sai-chinnam/antigravity-superpowers
 npx antigravity-superpowers init --global --mcp --hooks
 ```
 
-### CLI Commands:
+### Power CLI Commands:
 ```bash
-# Diagnostic health check of Nix, Herdr, Node, and Agent environment
+# Diagnostic health check of Nix, Herdr, Node, Git, and Agent environment
 antigravity-superpowers doctor
 
-# Validate installed profile integrity (106 checks)
+# Validate installed profile integrity (118 checks)
 antigravity-superpowers check
 
 # Synchronize latest skills and rules without overwriting custom project files
 antigravity-superpowers sync
+
+# Launch Model Context Protocol server providing NixOS and Herdr tools
+antigravity-superpowers mcp serve
+
+# Spin up a Herdr multi-agent swarm (Trio Architecture: Architect + Implementer + Watcher)
+antigravity-superpowers swarm start --preset trio
+
+# Start continuous watcher with auto-formatting and static linters
+antigravity-superpowers watch --fix
+
+# Check live Antigravity / Gemini model quotas and reset countdowns
+antigravity-superpowers quota
+
+# Bootstrap complete language & tooling workspace presets
+antigravity-superpowers preset nixos
+antigravity-superpowers preset web
+antigravity-superpowers preset rust
+antigravity-superpowers preset python
 ```
 
 ---

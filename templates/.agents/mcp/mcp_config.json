@@ -1,5 +1,12 @@
 {
   "mcpServers": {
+    "antigravity-superpowers": {
+      "command": "antigravity-superpowers",
+      "args": [
+        "mcp",
+        "serve"
+      ]
+    },
     "nix-search": {
       "command": "nix",
       "args": [

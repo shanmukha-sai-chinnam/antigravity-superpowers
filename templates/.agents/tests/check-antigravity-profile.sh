@@ -80,6 +80,9 @@ required_skills=(
   "nix-flake-management"
   "nix-derivation-debugging"
   "nix-code-audit"
+  "herdr-multi-agent-orchestration"
+  "antigravity-mcp-integration"
+  "continuous-codebase-watching"
 )
 
 for skill in "${required_skills[@]}"; do

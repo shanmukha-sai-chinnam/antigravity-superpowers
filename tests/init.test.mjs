@@ -196,3 +196,64 @@ test("init --global installs to GEMINI_CONFIG_DIR", async () => {
     await rm(globalDir, { recursive: true, force: true });
   }
 });
+
+test("mcp tools command lists available tools", async () => {
+  const result = runCli(["mcp", "tools"]);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /nixos_generation_info/);
+  assert.match(result.stdout, /nixos_service_status/);
+  assert.match(result.stdout, /herdr_pane_list/);
+  assert.match(result.stdout, /antigravity_quota_info/);
+});
+
+test("mcp config command prints declarative server snippet", async () => {
+  const result = runCli(["mcp", "config"]);
+  assert.equal(result.status, 0);
+  const parsed = JSON.parse(result.stdout);
+  assert.ok(parsed.mcpServers["antigravity-superpowers"]);
+});
+
+test("swarm help command prints preset information", async () => {
+  const result = runCli(["swarm", "--help"]);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /trio/);
+  assert.match(result.stdout, /devops/);
+});
+
+test("swarm status command reports session state", async () => {
+  const result = runCli(["swarm", "status"]);
+  assert.equal(result.status, 0);
+});
+
+test("watch --once scans and validates codebase", async () => {
+  const result = runCli(["watch", "--once"]);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /Scan complete/);
+});
+
+test("quota command executes and checks quota", async () => {
+  const result = runCli(["quota"]);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /Antigravity/);
+});
+
+test("preset nixos scaffolds full NixOS developer project", async () => {
+  const projectDir = await createTempProject("agsp-preset-");
+
+  try {
+    const result = runCli(["preset", "nixos"], projectDir);
+    assert.equal(result.status, 0);
+
+    const hasFlake = await pathExists(join(projectDir, "flake.nix"));
+    assert.equal(hasFlake, true, "preset should create flake.nix");
+
+    const hasAgents = await pathExists(join(projectDir, ".agents", "AGENTS.md"));
+    assert.equal(hasAgents, true, "preset should initialize .agents");
+
+    const hasMcp = await pathExists(join(projectDir, ".agents", "mcp_config.json"));
+    assert.equal(hasMcp, true, "preset should create mcp_config.json");
+  } finally {
+    await rm(projectDir, { recursive: true, force: true });
+  }
+});
+
