@@ -88,7 +88,7 @@
     })
     // {
       overlays.default = final: _prev: {
-        antigravity-superpowers = self.packages.${final.system}.default;
+        antigravity-superpowers = self.packages.${final.stdenv.hostPlatform.system}.default;
       };
 
       nixosModules.default = {
@@ -104,7 +104,7 @@
 
           package = lib.mkOption {
             type = lib.types.package;
-            default = self.packages.${pkgs.system}.default;
+            default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
             description = "The antigravity-superpowers package to install.";
           };
 
