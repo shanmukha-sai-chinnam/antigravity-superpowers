@@ -1,4 +1,4 @@
-import { access, cp, rm, stat, symlink, mkdir, writeFile } from "node:fs/promises";
+import { access, cp, rm, stat, symlink, mkdir, writeFile, readdir, lstat } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join, resolve } from "node:path";
@@ -14,6 +14,24 @@ async function exists(path) {
     return true;
   } catch {
     return false;
+  }
+}
+
+async function copyDirectoryOverwritingSymlinks(src, dest) {
+  await mkdir(dest, { recursive: true });
+  const entries = await readdir(src, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = join(src, entry.name);
+    const destPath = join(dest, entry.name);
+    try {
+      const destStat = await lstat(destPath);
+      if (destStat.isSymbolicLink() || (destStat.isDirectory() && entry.isDirectory())) {
+        await rm(destPath, { recursive: true, force: true });
+      }
+    } catch {
+      // destPath does not exist, safe to copy
+    }
+    await cp(srcPath, destPath, { recursive: true });
   }
 }
 
@@ -141,10 +159,10 @@ export async function initCommand(args, { cwd, stdout, stderr }) {
       const rulesSrc = join(templateDir, "rules");
 
       if (await exists(skillsSrc)) {
-        await cp(skillsSrc, join(globalConfigDir, "skills"), { recursive: true });
+        await copyDirectoryOverwritingSymlinks(skillsSrc, join(globalConfigDir, "skills"));
       }
       if (await exists(rulesSrc)) {
-        await cp(rulesSrc, join(globalConfigDir, "rules"), { recursive: true });
+        await copyDirectoryOverwritingSymlinks(rulesSrc, join(globalConfigDir, "rules"));
       }
       if (parsed.mcp && (await exists(join(templateDir, "mcp", "mcp_config.json")))) {
         await cp(
@@ -153,7 +171,7 @@ export async function initCommand(args, { cwd, stdout, stderr }) {
         );
       }
       if (parsed.hooks && (await exists(join(templateDir, "hooks")))) {
-        await cp(join(templateDir, "hooks"), join(globalConfigDir, "hooks"), { recursive: true });
+        await copyDirectoryOverwritingSymlinks(join(templateDir, "hooks"), join(globalConfigDir, "hooks"));
       }
       stdout.write(`Installed Antigravity Superpowers globally at ${globalConfigDir}\n`);
       return 0;
