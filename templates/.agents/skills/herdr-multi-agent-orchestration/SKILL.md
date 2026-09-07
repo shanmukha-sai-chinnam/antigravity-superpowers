@@ -5,7 +5,7 @@ description: Use when coordinating multi-agent swarms across Herdr panes (Trio a
 
 # Herdr Multi-Agent Orchestration Runbook
 
-Coordinate concurrent AI coding agents and automated verification daemons across multiplexed Herdr / tmux panes.
+Coordinate concurrent AI coding agents and automated verification daemons across multiplexed Herdr panes.
 
 ## Core Swarm Architecture: The Trio Pattern
 
@@ -69,11 +69,14 @@ antigravity-superpowers swarm broadcast "Starting phase 2: Run verification on m
 
 When sending directives between panes:
 ```bash
-# Send command to pane 2 (Implementer)
-tmux send-keys -t agsp-swarm.1 "npm test" C-m
+# Execute command on worker pane
+herdr pane run <pane-id> "npm test"
+
+# Send input or keystrokes to a pane
+herdr pane send-text <pane-id> "npm test\n"
 
 # Inspect pane output without switching focus
-tmux capture-pane -pt agsp-swarm.1 -S -50
+herdr pane read <pane-id>
 ```
 
 ## Teardown and Cleanup

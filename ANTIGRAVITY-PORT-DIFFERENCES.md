@@ -1,120 +1,77 @@
 # Antigravity Port Differences vs Original Superpowers
 
-This document lists the current differences between:
+This document details the architecture and evolution between:
 
-- Original skill set: `skills/`
-- Antigravity port: `templates/.agent/skills/` (+ Antigravity profile docs/tests)
+- Original skill set: `skills/` (designed for Claude Code)
+- Modern Antigravity Superpowers: `templates/.agents/` + CLI + Nix Flake + Herdr Orchestration
 
-## 1) High-Level Delta
+---
 
-- Skill count changed from **14** (original) to **13** (port).
-- Port keeps 12 original skill names, removes 2, and adds:
-  - `single-flow-task-execution` (new Antigravity-only execution skill, consolidates content from the removed `dispatching-parallel-agents` and `subagent-driven-development`)
-- Removed skills:
-  - `dispatching-parallel-agents` — decomposition pattern merged into `single-flow-task-execution`
-  - `subagent-driven-development` — two-stage review loop merged into `single-flow-task-execution`
-- Core model changed from generic subagent/parallel coding to **single-flow task execution**.
-- Generic coding subagent usage is replaced with:
-  - `task_boundary` for coding tasks
-  - `browser_subagent` only for browser automation
-- Legacy platform/tool vocabulary was translated to Antigravity equivalents:
-  - `Claude/Claude Code` -> `Antigravity`
-  - `Skill tool` -> `view_file`
-  - `TodoWrite` -> update `<project-root>/docs/plans/task.md`
-  - `superpowers:<skill>` references -> local `.agent/skills/.../SKILL.md`
+## 1) High-Level Architecture & Evolution
 
-## 2) Task Tracking Model Differences
+- **Skill Count**: Expanded from **14** (original) to **23 specialized skills**:
+  - 14 Core Process & Quality skills ported and normalized for Antigravity 2.0.
+  - 4 NixOS & Flake systems engineering skills (`nixos-system-rebuild`, `nix-flake-management`, `nix-derivation-debugging`, `nix-code-audit`).
+  - 2 Herdr & Swarm orchestration skills (`herdr`, `herdr-multi-agent-orchestration`).
+  - 1 Model Context Protocol skill (`antigravity-mcp-integration`).
+  - 1 Real-time verification skill (`continuous-codebase-watching`).
+  - 2 NixOS-WSL & Host interoperability skills (`nixos-wsl-interop`, `windows-wsl-host-bridge`).
+- **Discovery Roots**: Migrated to `.agents/` as primary root (with `.agent/` backward compatibility). Global root is `~/.gemini/config/`.
+- **Execution Model**:
+  - Single-agent tasks leverage Antigravity Planning Mode (`implementation_plan.md`, `walkthrough.md`).
+  - Multi-agent swarms leverage **Herdr** (`herdr pane split`, `herdr agent start`) for parallel worker and reviewer execution (zero tmux dependencies).
+- **Task Tracking**:
+  - Legacy `TodoWrite` replaced with native Planning Mode artifacts or project-root `<project-root>/.agents/task.md`.
+- **Platform & Tool Vocabulary Translation**:
+  - `Claude / Claude Code` -> `Antigravity`
+  - `Skill tool` -> `view_file` on `SKILL.md`
+  - `browser` tasks -> `browser_subagent`
+  - `superpowers:<skill>` -> `.agents/skills/<skill>/SKILL.md`
+  - `CLAUDE.md` -> `.agents/AGENTS.md`
 
-- Original skills used `TodoWrite` semantics.
-- Port uses project runtime file: `<project-root>/docs/plans/task.md`.
-- Port includes `.agent/task.md` as a **template/instruction reference** only.
-- Live tracker requirements in the port:
-  - lives at project root `docs/plans/task.md`
-  - table-only tracker (no prose/instructions)
-  - not packaged as `templates/.agent/docs/plans/task.md`
+---
 
-## 3) Skill-by-Skill Differences
+## 2) Complete Skill Inventory (23 Skills)
 
-## Major Behavioral Rewrites
+| Skill | Category | Source / Evolution |
+| :--- | :--- | :--- |
+| `brainstorming` | Process | Preserved, path normalized |
+| `writing-plans` | Process | Uses Antigravity Planning Mode & artifacts |
+| `executing-plans` | Execution | Integrated with single-flow discipline |
+| `single-flow-task-execution` | Execution | **New** — Merges `dispatching-parallel-agents` & `subagent-driven-development` |
+| `herdr` | Orchestration | **New** — Terminal multiplexing & agent management |
+| `herdr-multi-agent-orchestration` | Orchestration | **New** — Trio Architecture (Architect, Implementer, Watcher) |
+| `antigravity-mcp-integration` | Protocol | **New** — STDIO JSON-RPC 2.0 Model Context Protocol |
+| `continuous-codebase-watching` | Verifier | **New** — Sub-second automated linter & test feedback daemon |
+| `nixos-system-rebuild` | Systems | **New** — Pre-flight checks, 5-stage validation, closure diffs, rollback |
+| `nix-flake-management` | Packaging | **New** — Flake authoring, devShells, input pinning |
+| `nix-derivation-debugging` | Packaging | **New** — 6-phase stdenv dissection, wrappers, patchelf |
+| `nix-code-audit` | Linting | **New** — Alejandra, Statix, Deadnix pipeline |
+| `nixos-wsl-interop` | WSL / Systems | **New** — Filesystem boundaries, systemd, memory reclaim, mirrored network |
+| `windows-wsl-host-bridge` | WSL / Host | **New** — Path conversion (`wslpath`), clipboard, Windows Terminal, browser preview |
+| `test-driven-development` | Quality | Preserved, path normalized |
+| `systematic-debugging` | Debugging | Preserved, path normalized |
+| `requesting-code-review` | Review | Checklist and review gate flow |
+| `receiving-code-review` | Review | Rigorous verification without performative agreement |
+| `verification-before-completion` | Quality | Evidence before assertions always |
+| `finishing-a-development-branch` | Git | Clean branch options and merge verification |
+| `using-git-worktrees` | Git | Isolated worktrees with safe directory selection |
+| `using-superpowers` | Core | Automatic skill discovery and routing bootstrap |
+| `writing-skills` | Authoring | Creating new skills following AGY standards |
 
-- `single-flow-task-execution` (NEW — consolidated from 3 sources)
-  - Merges content from original `dispatching-parallel-agents` (task decomposition + queuing) and `subagent-driven-development` (two-stage review loop).
-  - Strict single-flow execution with `task_boundary`, review gates retained.
-  - Progress tracking via `<project-root>/docs/plans/task.md`.
-  - Review prompt templates (`implementer-prompt.md`, `spec-reviewer-prompt.md`, `code-quality-reviewer-prompt.md`) moved into this skill directory.
+---
 
-- `requesting-code-review`
-  - Original: dispatches `superpowers:code-reviewer` subagent.
-  - Port: checklist-based structured review flow (no generic coding subagent dispatch).
-  - Integration text updated to single-flow wording.
+## 3) Tool Surface Comparison
 
-- `writing-plans`
-  - Original handoff: subagent-driven vs parallel-session via `superpowers:*`.
-  - Port handoff: `single-flow-task-execution` vs `.agent/skills/executing-plans/SKILL.md`.
-  - Plan header updated for Antigravity-required execution skill path.
-
-- `executing-plans`
-  - Original: creates/uses `TodoWrite`; integrates with `superpowers:*` skills.
-  - Port: updates `<project-root>/docs/plans/task.md` and uses local `.agent/skills` references.
-  - Adds explicit `task_boundary`/`browser_subagent` execution rule.
-
-## Targeted Adaptations (Not Full Rewrites)
-
-- `using-superpowers`
-  - Skill loading switched to `view_file`.
-  - Checklist tracking switched to project-root `docs/plans/task.md`.
-  - Adds explicit instruction to create tracker file if missing (table-only format).
-
-- `writing-skills`
-  - Platform references and personal skill paths changed to Antigravity style.
-  - Required background references changed from `superpowers:*` to local `.agent/skills` paths.
-  - Checklist tracking text updated to project-root table-only tracker.
-
-- `systematic-debugging`
-  - Related skill references changed from `superpowers:*` to local `.agent/skills/...`.
-  - Support creation log path references normalized away from Claude-specific location.
-
-- `using-git-worktrees`
-  - Directory preference source changed from `CLAUDE.md` to `.agent/AGENTS.md`.
-
-- `receiving-code-review`
-  - Style violation example changed from `CLAUDE.md` violation to `.agent/AGENTS.md` violation.
-
-- `writing-skills/persuasion-principles.md`
-  - `TodoWrite` examples updated to `<project-root>/docs/plans/task.md` tracking wording.
-
-## Mostly Preserved Skills (Behavior Intact, Terminology/Path Normalization)
-
-- `brainstorming`
-- `test-driven-development`
-- `verification-before-completion`
-- `finishing-a-development-branch`
-
-These keep the original core process intent, with Antigravity naming/path normalization where needed.
-
-## 4) Renamed Supporting Files in `writing-skills`
-
-- `anthropic-best-practices.md` -> `antigravity-best-practices.md`
-- `examples/CLAUDE_MD_TESTING.md` -> `examples/AGENTS_MD_TESTING.md`
-
-## 5) Antigravity-Only Profile Files Added
-
-Compared to original `skills/`-only set, the port adds profile scaffolding:
-
-- `.agent/AGENTS.md` (tool translation + execution contract)
-- `.agent/INSTALL.md` (installation for target projects)
-- `.agent/task.md` (template/reference)
-- `.agent/tests/check-antigravity-profile.sh`
-- `.agent/tests/run-tests.sh`
-- `README.md`
-- `CURRENT-FLOW.md`
-
-## 6) Validation/Guardrail Differences
-
-The Antigravity port adds automated profile checks that the original skill library does not include:
-
-- Required skill/doc presence checks
-- Frontmatter validation (`name`, `description`)
-- Legacy-instruction pattern detection (e.g., old `superpowers:`/Task tool phrasing)
-- AGENTS mapping contract checks
-- Guard that packaged runtime tracker (`templates/.agent/docs/plans/task.md`) is absent
+| Original Claude Code Tool | Antigravity Native Equivalent |
+| :--- | :--- |
+| `Skill` | `view_file` |
+| `Task` (coding subagent) | Herdr multi-agent pane or Planning Mode task breakdown |
+| `Task` (browser) | `browser_subagent` |
+| `Bash` | `run_command` |
+| `Glob` / `Grep` | `grep_search` (ripgrep) |
+| `Read` / `View` | `view_file` |
+| `Edit` | `replace_file_content` / `multi_replace_file_content` |
+| `Write` | `write_to_file` |
+| `TodoWrite` | `implementation_plan.md` / `task.md` |
+| `mcp_*` | Native MCP tool execution over stdio JSON-RPC |

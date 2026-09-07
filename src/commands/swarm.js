@@ -4,37 +4,66 @@ import { resolve } from "node:path";
 
 const execFileAsync = promisify(execFile);
 
-function checkMuxAvailable() {
+function checkHerdrAvailable() {
   try {
-    execSync("which herdr || which tmux", { stdio: "ignore" });
+    execSync("which herdr", { stdio: "ignore" });
     return true;
   } catch {
     return false;
   }
 }
 
-async function runTmux(args) {
-  return execFileAsync("tmux", args);
+async function runHerdr(args) {
+  return execFileAsync("herdr", args);
+}
+
+async function ensureHerdrServerRunning() {
+  try {
+    const { stdout } = await runHerdr(["status"]);
+    if (stdout.includes("status: running")) {
+      return true;
+    }
+  } catch {
+    // not running
+  }
+
+  // Start background headless server
+  try {
+    const child = execSync("nohup herdr server > ~/.config/herdr/herdr-server.log 2>&1 &", {
+      stdio: "ignore",
+    });
+    // Give it a brief moment to bind socket
+    for (let i = 0; i < 5; i++) {
+      try {
+        const { stdout } = await runHerdr(["status"]);
+        if (stdout.includes("status: running")) return true;
+      } catch {
+        // retry
+      }
+      await new Promise((r) => setTimeout(r, 200));
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function swarmCommand(args, { cwd, stdout, stderr }) {
   const [action, ...flags] = args;
 
-  if (!checkMuxAvailable()) {
+  if (!checkHerdrAvailable()) {
     stderr.write(
-      "Error: Neither 'herdr' nor 'tmux' was found in PATH. Please install Herdr or tmux.\n",
+      "Error: 'herdr' was not found in PATH. Please install Herdr (https://herdr.dev).\n",
     );
     return 1;
   }
-
-  const sessionName = "agsp-swarm";
 
   if (!action || action === "help" || action === "--help") {
     stdout.write(
       [
         "antigravity-superpowers swarm",
         "",
-        "Manage multi-agent orchestrator swarms in Herdr / tmux.",
+        "Manage multi-agent orchestrator swarms exclusively via Herdr.",
         "",
         "Usage:",
         "  antigravity-superpowers swarm start [--preset trio|pair|devops|review] [--workspace <dir>]",
@@ -53,35 +82,56 @@ export async function swarmCommand(args, { cwd, stdout, stderr }) {
     return 0;
   }
 
+  await ensureHerdrServerRunning();
+
   if (action === "status") {
     try {
-      const { stdout: sessionOut } = await runTmux([
-        "list-panes",
-        "-t",
-        sessionName,
-        "-F",
-        "Pane #{pane_index} (#{pane_id}): #{pane_title} [#{pane_width}x#{pane_height}] (PID: #{pane_pid})",
-      ]);
+      const { stdout: paneListJson } = await runHerdr(["pane", "list"]);
+      const parsed = JSON.parse(paneListJson);
+      const panes = parsed.result?.panes || [];
+
       stdout.write(`========================================\n`);
-      stdout.write(` Active Swarm Session: ${sessionName}\n`);
+      stdout.write(` Active Herdr Swarm Topology\n`);
       stdout.write(`========================================\n\n`);
-      stdout.write(`${sessionOut.trim()}\n\n`);
+
+      if (panes.length === 0) {
+        stdout.write("No active panes detected in Herdr workspace.\n");
+      } else {
+        for (const p of panes) {
+          const title = p.terminal_title || p.label || "terminal";
+          const focus = p.focused ? " (FOCUSED)" : "";
+          stdout.write(`- Pane [${p.pane_id}] ${title}${focus}\n`);
+          stdout.write(`  CWD: ${p.cwd}\n`);
+          stdout.write(`  Agent Status: ${p.agent_status || "idle"}\n\n`);
+        }
+      }
 
       try {
-        const { stdout: herdrOut } = await execFileAsync("herdr", [
-          "integration",
-          "status",
-        ]);
-        stdout.write(`Herdr Integration Status:\n${herdrOut.trim()}\n`);
+        const { stdout: agentListJson } = await runHerdr(["agent", "list"]);
+        const agentParsed = JSON.parse(agentListJson);
+        const agents = agentParsed.result?.agents || [];
+        if (agents.length > 0) {
+          stdout.write("Active Recognized AI Agents:\n");
+          for (const a of agents) {
+            stdout.write(`  * ${a.name} (${a.kind}) on ${a.pane_id}: status=${a.state}\n`);
+          }
+          stdout.write("\n");
+        }
       } catch {
-        // Herdr command optional
+        // agent list optional
       }
+
+      try {
+        const { stdout: integOut } = await runHerdr(["integration", "status"]);
+        stdout.write(`Herdr Agent Integrations:\n${integOut.trim()}\n`);
+      } catch {
+        // integration list optional
+      }
+
       return 0;
-    } catch {
-      stdout.write(
-        `No active swarm session found for '${sessionName}'.\nStart one with: antigravity-superpowers swarm start\n`,
-      );
-      return 0;
+    } catch (err) {
+      stderr.write(`Failed to query Herdr status: ${err.message}\n`);
+      return 1;
     }
   }
 
@@ -93,39 +143,48 @@ export async function swarmCommand(args, { cwd, stdout, stderr }) {
     }
 
     try {
-      const { stdout: paneIds } = await runTmux([
-        "list-panes",
-        "-t",
-        sessionName,
-        "-F",
-        "#{pane_id}",
-      ]);
-      const panes = paneIds.trim().split("\n");
-      for (const pane of panes) {
-        await runTmux([
-          "send-keys",
-          "-t",
-          pane,
-          `echo ">>> SWARM BROADCAST: ${message}"`,
-          "C-m",
+      const { stdout: paneListJson } = await runHerdr(["pane", "list"]);
+      const parsed = JSON.parse(paneListJson);
+      const panes = parsed.result?.panes || [];
+
+      if (panes.length === 0) {
+        stderr.write("No active Herdr panes to broadcast to.\n");
+        return 1;
+      }
+
+      for (const p of panes) {
+        await runHerdr([
+          "pane",
+          "send-text",
+          p.pane_id,
+          `\necho ">>> HERDR SWARM BROADCAST: ${message}"\n`,
         ]);
       }
-      stdout.write(`Broadcast sent to ${panes.length} pane(s) in '${sessionName}'.\n`);
+      stdout.write(`Broadcast delivered to ${panes.length} Herdr pane(s).\n`);
       return 0;
     } catch (err) {
-      stderr.write(`Failed to broadcast to session '${sessionName}': ${err.message}\n`);
+      stderr.write(`Broadcast failed: ${err.message}\n`);
       return 1;
     }
   }
 
   if (action === "stop") {
     try {
-      await runTmux(["kill-session", "-t", sessionName]);
-      stdout.write(`Swarm session '${sessionName}' stopped cleanly.\n`);
+      const { stdout: paneListJson } = await runHerdr(["pane", "list"]);
+      const parsed = JSON.parse(paneListJson);
+      const panes = parsed.result?.panes || [];
+
+      // Close all but the primary pane
+      let closed = 0;
+      for (let i = 1; i < panes.length; i++) {
+        await runHerdr(["pane", "close", panes[i].pane_id]);
+        closed++;
+      }
+      stdout.write(`Closed ${closed} swarm pane(s). Primary Herdr workspace preserved.\n`);
       return 0;
     } catch (err) {
-      stdout.write(`No running swarm session '${sessionName}' found.\n`);
-      return 0;
+      stderr.write(`Failed to close swarm panes: ${err.message}\n`);
+      return 1;
     }
   }
 
@@ -143,178 +202,164 @@ export async function swarmCommand(args, { cwd, stdout, stderr }) {
       }
     }
 
-    // Check if session already exists
+    stdout.write(`Provisioning Herdr Swarm with preset: ${preset} in ${targetDir}...\n`);
+
     try {
-      await runTmux(["has-session", "-t", sessionName]);
-      stdout.write(
-        `Swarm session '${sessionName}' is already active.\nRun 'antigravity-superpowers swarm status' or attach with 'tmux attach -t ${sessionName}'.\n`,
-      );
-      return 0;
-    } catch {
-      // Session does not exist, proceed
-    }
+      const { stdout: paneListJson } = await runHerdr(["pane", "list"]);
+      const parsed = JSON.parse(paneListJson);
+      const panes = parsed.result?.panes || [];
 
-    stdout.write(`Provisioning Herdr Swarm '${sessionName}' with preset: ${preset}...\n`);
+      let primaryPaneId = panes[0]?.pane_id;
 
-    if (preset === "trio") {
-      // 1. Create session with Pane 1: Architect
-      await runTmux([
-        "new-session",
-        "-d",
-        "-s",
-        sessionName,
-        "-c",
-        targetDir,
-        "-n",
-        "trio-swarm",
-      ]);
-      await runTmux([
-        "select-pane",
-        "-t",
-        `${sessionName}:0.0`,
-        "-T",
-        "Architect (Antigravity Planning)",
-      ]);
-      await runTmux([
-        "send-keys",
-        "-t",
-        `${sessionName}:0.0`,
-        `export HERDR_ROLE=architect; clear; echo '=== PANE 1: ARCHITECT (Antigravity Lead) ==='; echo 'Directory: ${targetDir}'; antigravity-superpowers doctor`,
-        "C-m",
-      ]);
+      if (!primaryPaneId) {
+        stdout.write("Herdr server is running. Launch 'herdr' to open the workspace TUI.\n");
+        return 0;
+      }
 
-      // 2. Split horizontally for Pane 3: Monitor (Right)
-      await runTmux([
-        "split-window",
-        "-h",
-        "-t",
-        `${sessionName}:0.0`,
-        "-c",
-        targetDir,
-      ]);
-      await runTmux([
-        "select-pane",
-        "-t",
-        `${sessionName}:0.1`,
-        "-T",
-        "Watcher (Continuous Verifier)",
-      ]);
-      await runTmux([
-        "send-keys",
-        "-t",
-        `${sessionName}:0.1`,
-        `export HERDR_ROLE=monitor; clear; echo '=== PANE 3: WATCHER ==='; antigravity-superpowers watch`,
-        "C-m",
-      ]);
+      if (preset === "trio") {
+        // 1. Label primary pane as Architect
+        await runHerdr(["pane", "rename", primaryPaneId, "Architect (Antigravity Lead)"]);
 
-      // 3. Split Pane 0 vertically for Pane 2: Implementer (Bottom Left)
-      await runTmux([
-        "split-window",
-        "-v",
-        "-t",
-        `${sessionName}:0.0`,
-        "-c",
-        targetDir,
-      ]);
-      await runTmux([
-        "select-pane",
-        "-t",
-        `${sessionName}:0.1`,
-        "-T",
-        "Implementer (Nix DevShell)",
-      ]);
-      await runTmux([
-        "send-keys",
-        "-t",
-        `${sessionName}:0.1`,
-        `export HERDR_ROLE=implementer; clear; echo '=== PANE 2: IMPLEMENTER (Worker) ==='; nix develop 2>/dev/null || bash`,
-        "C-m",
-      ]);
+        // 2. Split right for Watcher (Pane 3)
+        const splitWatcher = await runHerdr([
+          "pane",
+          "split",
+          "--direction",
+          "right",
+          "--cwd",
+          targetDir,
+          "--env",
+          "HERDR_ROLE=monitor",
+          "--no-focus",
+          primaryPaneId,
+        ]);
+        let watcherPaneId = null;
+        try {
+          const wParsed = JSON.parse(splitWatcher.stdout);
+          watcherPaneId = wParsed.result?.pane?.pane_id || wParsed.result?.pane_id;
+        } catch {
+          // ignore
+        }
 
-      // Focus back to Pane 0
-      await runTmux(["select-pane", "-t", `${sessionName}:0.0`]);
-    } else if (preset === "pair") {
-      await runTmux([
-        "new-session",
-        "-d",
-        "-s",
-        sessionName,
-        "-c",
-        targetDir,
-        "-n",
-        "pair-swarm",
-      ]);
-      await runTmux([
-        "select-pane",
-        "-t",
-        `${sessionName}:0.0`,
-        "-T",
-        "Architect (Antigravity Lead)",
-      ]);
-      await runTmux([
-        "split-window",
-        "-h",
-        "-t",
-        `${sessionName}:0.0`,
-        "-c",
-        targetDir,
-      ]);
-      await runTmux([
-        "select-pane",
-        "-t",
-        `${sessionName}:0.1`,
-        "-T",
-        "Implementer (Worker)",
-      ]);
-    } else if (preset === "devops") {
-      await runTmux([
-        "new-session",
-        "-d",
-        "-s",
-        sessionName,
-        "-c",
-        targetDir,
-        "-n",
-        "devops-swarm",
-      ]);
-      await runTmux([
-        "select-pane",
-        "-t",
-        `${sessionName}:0.0`,
-        "-T",
-        "Sysadmin (NixOS Rebuild)",
-      ]);
-      await runTmux([
-        "split-window",
-        "-v",
-        "-t",
-        `${sessionName}:0.0`,
-        "-c",
-        targetDir,
-      ]);
-      await runTmux([
-        "select-pane",
-        "-t",
-        `${sessionName}:0.1`,
-        "-T",
-        "Journal & Metrics",
-      ]);
-      await runTmux([
-        "send-keys",
-        "-t",
-        `${sessionName}:0.1`,
-        "journalctl --user -f",
-        "C-m",
-      ]);
-    } else {
+        if (watcherPaneId) {
+          await runHerdr(["pane", "rename", watcherPaneId, "Watcher (Continuous Verifier)"]);
+          await runHerdr([
+            "pane",
+            "run",
+            watcherPaneId,
+            "antigravity-superpowers watch",
+          ]);
+        }
+
+        // 3. Split down from Architect for Implementer (Pane 2)
+        const splitWorker = await runHerdr([
+          "pane",
+          "split",
+          "--direction",
+          "down",
+          "--cwd",
+          targetDir,
+          "--env",
+          "HERDR_ROLE=implementer",
+          "--no-focus",
+          primaryPaneId,
+        ]);
+        let workerPaneId = null;
+        try {
+          const workerParsed = JSON.parse(splitWorker.stdout);
+          workerPaneId = workerParsed.result?.pane?.pane_id || workerParsed.result?.pane_id;
+        } catch {
+          // ignore
+        }
+
+        if (workerPaneId) {
+          await runHerdr(["pane", "rename", workerPaneId, "Implementer (Nix DevShell)"]);
+          await runHerdr([
+            "pane",
+            "run",
+            workerPaneId,
+            "nix develop 2>/dev/null || bash",
+          ]);
+        }
+
+        stdout.write(`\n[SUCCESS] Herdr Trio Swarm successfully configured!\n`);
+        stdout.write(`- Pane [${primaryPaneId}]: Architect (Antigravity Lead)\n`);
+        if (workerPaneId) stdout.write(`- Pane [${workerPaneId}]: Implementer (Nix DevShell)\n`);
+        if (watcherPaneId) stdout.write(`- Pane [${watcherPaneId}]: Watcher (Continuous Verifier)\n`);
+        stdout.write(`\nUse 'herdr' to view the TUI, or 'antigravity-superpowers swarm status'.\n`);
+        return 0;
+      }
+
+      if (preset === "pair") {
+        await runHerdr(["pane", "rename", primaryPaneId, "Architect (Antigravity Lead)"]);
+        const splitWorker = await runHerdr([
+          "pane",
+          "split",
+          "--direction",
+          "right",
+          "--cwd",
+          targetDir,
+          "--no-focus",
+          primaryPaneId,
+        ]);
+        let workerPaneId = null;
+        try {
+          const wParsed = JSON.parse(splitWorker.stdout);
+          workerPaneId = wParsed.result?.pane?.pane_id || wParsed.result?.pane_id;
+        } catch {
+          // ignore
+        }
+        if (workerPaneId) {
+          await runHerdr(["pane", "rename", workerPaneId, "Implementer (Worker)"]);
+          await runHerdr([
+            "pane",
+            "run",
+            workerPaneId,
+            "nix develop 2>/dev/null || bash",
+          ]);
+        }
+        stdout.write(`\n[SUCCESS] Herdr Pair Swarm configured!\n`);
+        return 0;
+      }
+
+      if (preset === "devops") {
+        await runHerdr(["pane", "rename", primaryPaneId, "Sysadmin (NixOS Rebuild)"]);
+        const splitJournal = await runHerdr([
+          "pane",
+          "split",
+          "--direction",
+          "down",
+          "--cwd",
+          targetDir,
+          "--no-focus",
+          primaryPaneId,
+        ]);
+        let journalPaneId = null;
+        try {
+          const jParsed = JSON.parse(splitJournal.stdout);
+          journalPaneId = jParsed.result?.pane?.pane_id || jParsed.result?.pane_id;
+        } catch {
+          // ignore
+        }
+        if (journalPaneId) {
+          await runHerdr(["pane", "rename", journalPaneId, "Journal Stream"]);
+          await runHerdr([
+            "pane",
+            "run",
+            journalPaneId,
+            "journalctl --user -f",
+          ]);
+        }
+        stdout.write(`\n[SUCCESS] Herdr DevOps Swarm configured!\n`);
+        return 0;
+      }
+
       stderr.write(`Unknown preset: ${preset}. Supported: trio, pair, devops, review\n`);
       return 1;
+    } catch (err) {
+      stderr.write(`Failed to provision swarm: ${err.message}\n`);
+      return 1;
     }
-
-    stdout.write(`\n[SUCCESS] Swarm '${sessionName}' successfully launched!\n`);
-    stdout.write(`To attach to the swarm: tmux attach -t ${sessionName} (or 'herdr')\n`);
-    stdout.write(`To check status: antigravity-superpowers swarm status\n`);
-    return 0;
   }
 
   stderr.write(`Unknown swarm action: ${action}\n`);

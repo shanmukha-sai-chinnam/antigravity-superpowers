@@ -72,7 +72,7 @@ const TOOLS = [
   {
     name: "herdr_send_command",
     description:
-      "Send a command or text input to a specific Herdr pane or tmux window.",
+      "Send a command or text input to a specific Herdr terminal pane.",
     inputSchema: {
       type: "object",
       properties: {
@@ -210,12 +210,11 @@ async function handleToolCall(name, args = {}, cwd = process.cwd()) {
 
       case "herdr_send_command": {
         const { target, command } = args;
-        const { stdout, stderr } = await execFileAsync("tmux", [
-          "send-keys",
-          "-t",
+        const { stdout, stderr } = await execFileAsync("herdr", [
+          "pane",
+          "send-text",
           target,
-          command,
-          "C-m",
+          `${command}\n`,
         ]).catch((err) => ({
           stdout: err.stdout || "",
           stderr: err.stderr || err.message,
@@ -224,7 +223,7 @@ async function handleToolCall(name, args = {}, cwd = process.cwd()) {
           content: [
             {
               type: "text",
-              text: stdout || stderr || `Command dispatched to target ${target}`,
+              text: stdout || stderr || `Command dispatched to Herdr pane ${target}`,
             },
           ],
         };

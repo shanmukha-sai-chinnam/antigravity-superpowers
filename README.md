@@ -35,13 +35,13 @@ The original Superpowers repo doesn't support Antigravity, and there's no offici
 
 This is my attempt to bring the full Superpowers skill set to Antigravity — as close to the original as possible. The goal was never to fork and diverge; it was to translate just enough to make everything work natively on a different platform. Superpowers skills bring real structure to AI-assisted development — brainstorming before implementation, planning before coding, verification before completion claims — and that discipline shouldn't be locked to one platform.
 
-This port brings **21 skills** covering the full development lifecycle, updated for modern Antigravity 2.0:
+This port brings **23 skills** covering the full development lifecycle, updated for modern Antigravity 2.0 and NixOS-WSL:
 
 ---
 
 ## What's Included
 
-**21 skills** covering the full development lifecycle, Antigravity 2.0 swarms, MCP integrations, and NixOS systems engineering:
+**23 skills** covering the full development lifecycle, Antigravity 2.0 swarms, MCP integrations, NixOS systems engineering, and WSL host interoperability:
 
 | Skill                             | Category          | Description                                              |
 | --------------------------------- | ----------------- | -------------------------------------------------------- |
@@ -53,12 +53,14 @@ This port brings **21 skills** covering the full development lifecycle, updated 
 | `herdr-multi-agent-orchestration` | Orchestration     | Swarm roles (Architect, Implementer, Watcher) & IPC      |
 | `antigravity-mcp-integration`     | Protocol / Tools  | Model Context Protocol STDIO JSON-RPC server integration |
 | `continuous-codebase-watching`    | Verifier / Daemon | Sub-second linter, formatter, and test feedback          |
-| `test-driven-development`         | Quality           | Write tests first, implement second                      |
-| `systematic-debugging`            | Debugging         | Root cause tracing with supporting techniques            |
 | `nixos-system-rebuild`            | NixOS / Systems   | Safe declarative rebuilds, diffs, and auto-rollback      |
 | `nix-flake-management`            | Nix / Packaging   | Flake authoring, input pinning, and devShells            |
 | `nix-derivation-debugging`        | Nix / Packaging   | Systematic stdenv phase and dynamic linker debugging     |
 | `nix-code-audit`                  | Nix / Linting     | Alejandra, Statix, Deadnix static validation pipeline    |
+| `nixos-wsl-interop`               | WSL / Systems     | Filesystem boundaries, systemd, memory, mirrored network |
+| `windows-wsl-host-bridge`         | WSL / Host        | Path conversion (`wslpath`), clipboard, Windows Terminal |
+| `test-driven-development`         | Quality           | Write tests first, implement second                      |
+| `systematic-debugging`            | Debugging         | Root cause tracing with supporting techniques            |
 | `requesting-code-review`          | Review            | Structured review flow with checklists                   |
 | `receiving-code-review`           | Review            | Handling feedback systematically                         |
 | `verification-before-completion`  | Quality           | Prove it works before claiming it's done                 |
@@ -67,7 +69,7 @@ This port brings **21 skills** covering the full development lifecycle, updated 
 | `using-superpowers`               | Core              | Skill routing and session bootstrap                      |
 | `writing-skills`                  | Authoring         | Create new skills that follow the system's conventions   |
 
-Plus supporting infrastructure: native Model Context Protocol server (`antigravity-superpowers mcp serve`), Herdr swarm orchestration (`antigravity-superpowers swarm`), continuous codebase watcher (`antigravity-superpowers watch`), live model quota inspector (`antigravity-superpowers quota`), workspace presets (`antigravity-superpowers preset`), declarative MCP configurations (`mcp_config.json`), lifecycle automation hooks (`hooks.json`), workflows, rules (`workflow-discipline.md`), validation tests (118 checks), and an `AGENTS.md` contract.
+Plus supporting infrastructure: native Model Context Protocol server (`antigravity-superpowers mcp serve`), Herdr swarm orchestration (`antigravity-superpowers swarm`), continuous codebase watcher (`antigravity-superpowers watch`), live model quota inspector (`antigravity-superpowers quota`), workspace presets (`antigravity-superpowers preset`), declarative MCP configurations (`mcp_config.json`), lifecycle automation hooks (`hooks.json`), workflows, rules (`workflow-discipline.md`), validation tests (127 checks), and an `AGENTS.md` contract.
 
 ---
 

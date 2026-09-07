@@ -51,6 +51,7 @@ required_files=(
   "$AGENT_DIR/workflows/write-plan.md"
   "$AGENT_DIR/workflows/execute-plan.md"
   "$AGENT_DIR/agents/code-reviewer.md"
+  "$AGENT_DIR/agents/wsl-systems-specialist.md"
   "$SCRIPT_DIR/check-antigravity-profile.sh"
   "$SCRIPT_DIR/run-tests.sh"
 )
@@ -83,6 +84,8 @@ required_skills=(
   "herdr-multi-agent-orchestration"
   "antigravity-mcp-integration"
   "continuous-codebase-watching"
+  "nixos-wsl-interop"
+  "windows-wsl-host-bridge"
 )
 
 for skill in "${required_skills[@]}"; do
