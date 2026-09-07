@@ -33,7 +33,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For Antigravity:** REQUIRED WORKFLOW: Use `.agent/workflows/execute-plan.md` to execute this plan in single-flow mode.
+> **For Antigravity:** When in Planning Mode, save as `<appDataDir>/brain/<conversation-id>/implementation_plan.md` (with `request_feedback: true`). For persistent repository plans, save to `docs/plans/YYYY-MM-DD-<feature-name>.md` and execute using `.agents/workflows/execute-plan.md` in single-flow mode.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -96,13 +96,13 @@ git commit -m "feat: add specific feature"
 
 ## Execution Handoff
 
-After saving the plan, use a single execution path:
+After saving the plan, proceed to execution:
 
-**"Plan complete and saved to `docs/plans/<filename>.md`.**
-**Next step: run `.agent/workflows/execute-plan.md` to execute this plan task-by-task in single-flow mode."**
+**"Plan complete and saved to `docs/plans/<filename>.md` (or native `implementation_plan.md`).**
+**Next step: run `.agents/workflows/execute-plan.md` to execute this plan task-by-task in single-flow mode."**
 
 Execution requirements:
-- **Entry workflow:** `.agent/workflows/execute-plan.md`
-- **Execution skill:** `.agent/skills/executing-plans/SKILL.md`
-- **Enforced execution model:** `.agent/skills/single-flow-task-execution/SKILL.md`
-- **Tracking:** update `<project-root>/docs/plans/task.md` (table-only tracker)
+- **Entry workflow:** `.agents/workflows/execute-plan.md`
+- **Execution skill:** `.agents/skills/executing-plans/SKILL.md`
+- **Enforced execution model:** `.agents/skills/single-flow-task-execution/SKILL.md`
+- **Tracking:** update native planning artifacts (`walkthrough.md`) and/or `<project-root>/docs/plans/task.md` (table-only tracker)

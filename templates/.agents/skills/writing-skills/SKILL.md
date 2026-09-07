@@ -268,7 +268,7 @@ Always use explicit workflow skill references. REQUIRED: Use [other-skill-name] 
 
 your human partner: "How did we handle authentication errors in React Router before?"
 You: I'll search past conversations for React Router authentication patterns.
-[Run task_boundary search: "React Router authentication error handling 401"]
+[Run grep_search: "React Router authentication error handling 401"]
 
 # ✅ GOOD: Minimal example (20 words)
 

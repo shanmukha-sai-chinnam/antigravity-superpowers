@@ -1,18 +1,22 @@
 import { initCommand } from "./commands/init.js";
+import { checkCommand } from "./commands/check.js";
 
 function helpText() {
   return [
     "antigravity-superpowers",
     "",
     "Usage:",
-    "  antigravity-superpowers init [target-directory] [--force]",
+    "  antigravity-superpowers init [target-directory] [--force] [--global]",
+    "  antigravity-superpowers check [target-directory]",
     "",
     "Commands:",
-    "  init      Initialize .agent profile in a project",
+    "  init      Initialize .agents profile in a project (or ~/.gemini/config with --global)",
+    "  check     Validate installed Antigravity Superpowers profile integrity",
     "",
     "Options:",
-    "  -f, --force   Overwrite existing .agent directory",
-    "  -h, --help    Show help",
+    "  -f, --force    Overwrite existing .agents directory",
+    "  -g, --global   Install globally to ~/.gemini/config",
+    "  -h, --help     Show help",
   ].join("\n");
 }
 
@@ -26,6 +30,14 @@ export async function runCli(args, io = process) {
 
   if (command === "init") {
     return initCommand(rest, {
+      cwd: io.cwd?.() ?? process.cwd(),
+      stdout: io.stdout,
+      stderr: io.stderr,
+    });
+  }
+
+  if (command === "check") {
+    return checkCommand(rest, {
       cwd: io.cwd?.() ?? process.cwd(),
       stdout: io.stdout,
       stderr: io.stderr,

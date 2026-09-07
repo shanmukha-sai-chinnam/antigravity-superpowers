@@ -21,8 +21,8 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 1. Read plan file
 2. Review critically - identify any questions or concerns about the plan
 3. If concerns: Raise them with your human partner before starting
-4. If no concerns: follow the single-flow execution model from `.agent/skills/single-flow-task-execution/SKILL.md`
-5. Update `<project-root>/docs/plans/task.md` (table-only tracker) and proceed
+4. If no concerns: follow the single-flow execution model from `.agents/skills/single-flow-task-execution/SKILL.md`
+5. Update native planning artifacts (`implementation_plan.md`, `walkthrough.md`) or `<project-root>/docs/plans/task.md` (table-only tracker) and proceed
 
 ### Step 2: Execute Batch
 
@@ -56,7 +56,7 @@ Based on feedback:
 After all tasks complete and verified:
 
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SKILL:** Use `.agent/skills/finishing-a-development-branch/SKILL.md`
+- **REQUIRED SKILL:** Use `.agents/skills/finishing-a-development-branch/SKILL.md`
 - Follow that skill to verify tests, present options, execute choice
 
 ## When to Stop and Ask for Help
@@ -88,13 +88,13 @@ After all tasks complete and verified:
 - Between batches: just report and wait
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
-- Use `task_boundary` for coding tasks; use `browser_subagent` only for browser tasks
+- Execute coding tasks sequentially in single-flow mode; use `browser_subagent` only for browser tasks; manage background tasks with `run_command`/`manage_task`; and utilize Herdr multi-agent orchestration when `HERDR_ENV=1`.
 
 ## Integration
 
 **Required workflow skills:**
 
-- **`.agent/skills/using-git-worktrees/SKILL.md`** - REQUIRED: Set up isolated workspace before starting
-- **`.agent/skills/writing-plans/SKILL.md`** - Creates the plan this skill executes
-- **`.agent/skills/single-flow-task-execution/SKILL.md`** - REQUIRED: Enforce single-flow execution with two-stage review
-- **`.agent/skills/finishing-a-development-branch/SKILL.md`** - Complete development after all tasks
+- **`.agents/skills/using-git-worktrees/SKILL.md`** - REQUIRED: Set up isolated workspace before starting
+- **`.agents/skills/writing-plans/SKILL.md`** - Creates the plan this skill executes
+- **`.agents/skills/single-flow-task-execution/SKILL.md`** - REQUIRED: Enforce single-flow execution with two-stage review
+- **`.agents/skills/finishing-a-development-branch/SKILL.md`** - Complete development after all tasks

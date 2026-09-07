@@ -1,7 +1,7 @@
 {
   "name": "antigravity-superpowers",
-  "version": "0.1.0",
-  "description": "CLI to initialize the Antigravity Superpowers .agent profile",
+  "version": "0.2.0",
+  "description": "CLI to initialize the Antigravity Superpowers profile for modern Antigravity 2.0",
   "type": "module",
   "bin": {
     "antigravity-superpowers": "bin/antigravity-superpowers.js"
@@ -9,6 +9,7 @@
   "files": [
     "bin/",
     "src/",
+    "templates/.agents/**",
     "templates/.agent/**",
     "README.md"
   ],

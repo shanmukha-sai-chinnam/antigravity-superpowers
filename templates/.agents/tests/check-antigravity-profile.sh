@@ -75,6 +75,7 @@ required_skills=(
   "writing-plans"
   "writing-skills"
   "single-flow-task-execution"
+  "herdr"
 )
 
 for skill in "${required_skills[@]}"; do
@@ -124,6 +125,9 @@ legacy_patterns=(
   'Mark task complete in TodoWrite'
   'Use TodoWrite'
   'superpowers:'
+  'task_boundary'
+  'find_by_name'
+  'view_file_outline'
 )
 
 for pattern in "${legacy_patterns[@]}"; do
@@ -138,14 +142,15 @@ echo ""
 echo "Checking AGENTS mapping contract..."
 
 mapping_checks=(
-  'Task.*task_boundary'
   'browser_subagent'
   'Skill.*view_file'
-  'TodoWrite.*docs/plans/task\.md'
   'run_command'
   'grep_search'
-  'find_by_name'
+  'manage_task'
+  'schedule'
+  'replace_file_content'
   'mcp_\*'
+  'herdr'
 )
 
 for pattern in "${mapping_checks[@]}"; do

@@ -2,11 +2,10 @@
 
 Use this template when executing an implementation task in single-flow mode.
 
-```
-task_boundary:
-  description: "Implement Task N: [task name]"
-  prompt: |
-    You are implementing Task N: [task name]
+```markdown
+### Task Step: Implement Task N: [task name]
+
+You are implementing Task N: [task name]
 
     ## Task Description
 

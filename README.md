@@ -19,7 +19,7 @@
 
 Superpowers is an incredible skill-based workflow system that gives AI coding assistants structured, reliable behavior — brainstorming, planning, test-driven development, code review, debugging, and more. It was originally designed for Claude Code, but the workflows themselves are platform-agnostic gold.
 
-**This project ports that entire system to Antigravity**, preserving the original flow as faithfully as possible. The goal is not to reinvent Superpowers — it's to make them available on Antigravity with the minimal set of changes needed for native compatibility. If you've used Superpowers before, everything should feel familiar. If you haven't, this is a great way to start.
+**This project ports that entire system to modern Antigravity 2.0**, preserving the original flow as faithfully as possible while leveraging modern Antigravity capabilities: native Planning Mode artifacts, rich tool translation contracts, `.agents` discovery, and Herdr multi-agent orchestration.
 
 > **One command. Full profile. Ready to go.**
 
@@ -35,20 +35,21 @@ The original Superpowers repo doesn't support Antigravity, and there's no offici
 
 This is my attempt to bring the full Superpowers skill set to Antigravity — as close to the original as possible. The goal was never to fork and diverge; it was to translate just enough to make everything work natively on a different platform. Superpowers skills bring real structure to AI-assisted development — brainstorming before implementation, planning before coding, verification before completion claims — and that discipline shouldn't be locked to one platform.
 
-This port keeps **12 out of 14 original skills intact** and consolidates the remaining 2 into a single new skill that fits Antigravity's execution model. Every skill preserves its original intent, logic, and flow — only the platform-specific references, tool names, and execution primitives have been adapted.
+This port brings **14 skills** covering the full development lifecycle, updated for modern Antigravity 2.0:
 
 ---
 
 ## What's Included
 
-**13 skills** covering the full development lifecycle:
+**14 skills** covering the full development lifecycle:
 
 | Skill                            | Description                                             |
 | -------------------------------- | ------------------------------------------------------- |
 | `brainstorming`                  | Structured exploration before committing to an approach |
 | `writing-plans`                  | Detailed, step-by-step implementation plans             |
 | `executing-plans`                | Disciplined plan execution with progress tracking       |
-| `single-flow-task-execution`     | Ordered task decomposition with review gates _(new)_    |
+| `single-flow-task-execution`     | Ordered task decomposition with review gates            |
+| `herdr`                          | Terminal multiplexer & multi-agent orchestration _(new)_|
 | `test-driven-development`        | Write tests first, implement second                     |
 | `systematic-debugging`           | Root cause tracing with supporting techniques           |
 | `requesting-code-review`         | Structured review flow with checklists                  |
@@ -59,59 +60,66 @@ This port keeps **12 out of 14 original skills intact** and consolidates the rem
 | `using-superpowers`              | Skill routing and session bootstrap                     |
 | `writing-skills`                 | Create new skills that follow the system's conventions  |
 
-Plus supporting infrastructure: workflows, agents, validation tests, and an `AGENTS.md` contract that ties it all together.
+Plus supporting infrastructure: workflows, rules (`workflow-discipline.md`), agents, validation tests, and an `AGENTS.md` contract that ties it all together.
 
 ---
 
 ## Quick Start
 
 ```bash
-# Scaffold the .agent profile into your project
+# Scaffold the .agents profile into your project
 npx antigravity-superpowers init
 ```
 
-Or install globally:
+Or install globally into `~/.gemini/config`:
 
 ```bash
-npm install -g antigravity-superpowers
-antigravity-superpowers init
+npx antigravity-superpowers init --global
 ```
 
 ### Options
 
 ```bash
-# Initialize in current directory
+# Initialize in current directory (.agents and .agent symlink)
 antigravity-superpowers init
 
 # Initialize in a specific project
 antigravity-superpowers init /path/to/project
 
-# Replace an existing .agent profile
+# Replace an existing profile
 antigravity-superpowers init --force
+
+# Install globally to ~/.gemini/config
+antigravity-superpowers init --global
+
+# Verify profile integrity
+antigravity-superpowers check
 ```
 
 After init, verify everything is wired up:
 
 ```bash
-bash .agent/tests/run-tests.sh
+antigravity-superpowers check
+# or
+bash .agents/tests/run-tests.sh
 ```
 
 ---
 
 ## How It Works
 
-The CLI copies a complete `.agent` profile into your project root. Once initialized, Antigravity picks up the profile automatically:
+The CLI copies a complete `.agents` profile into your project root (with `.agent` symlinked for backward compatibility). Once initialized, Antigravity picks up the profile automatically:
 
-1. **Session starts** — loads `.agent/AGENTS.md` rules and `using-superpowers` skill
+1. **Session starts** — loads `.agents/AGENTS.md` rules and `using-superpowers` skill
 2. **Each request gets routed** to the most relevant skill
 3. **Design work** flows through brainstorming → planning → execution
-4. **Every task** is tracked in `docs/plans/task.md` (created at runtime)
+4. **Every task** is tracked via native Planning Mode artifacts (`implementation_plan.md`, `walkthrough.md`) or `docs/plans/task.md`
 5. **Nothing is marked done** without running verification commands first
 
 ```
 Session Start → Load AGENTS.md → Load using-superpowers
                                         ↓
-                              Route to relevant skill
+                               Route to relevant skill
                                         ↓
                           ┌─── Design change? ───┐
                           │ yes                   │ no
@@ -134,32 +142,33 @@ Session Start → Load AGENTS.md → Load using-superpowers
 
 ### Execution Model
 
-The one notable structural change. The original Superpowers dispatches multiple coding subagents in parallel — but Antigravity doesn't support parallel subagent execution. So the two skills that relied on that capability (`dispatching-parallel-agents` and `subagent-driven-development`) couldn't be ported as-is. Instead, they were consolidated into a single new skill — **`single-flow-task-execution`** — which preserves the same decomposition logic, task queuing, and review gates, just executed sequentially rather than in parallel. The workflow is the same; the concurrency model is what changed.
+The one notable structural change. The original Superpowers dispatches multiple coding subagents in parallel — but Antigravity doesn't support parallel subagent execution. So the two skills that relied on that capability (`dispatching-parallel-agents` and `subagent-driven-development`) couldn't be ported as-is. Instead, they were consolidated into a single new skill — **`single-flow-task-execution`** — which preserves the same decomposition logic, task queuing, and review gates, just executed sequentially rather than in parallel. In addition, for environments with Herdr terminal multiplexing (`HERDR_ENV=1`), multi-agent delegation across sibling panes is natively available via the `herdr` skill.
 
 | Original Skill                | What Happened                                                   |
 | ----------------------------- | --------------------------------------------------------------- |
 | `dispatching-parallel-agents` | Merged into `single-flow-task-execution`                        |
 | `subagent-driven-development` | Merged into `single-flow-task-execution`                        |
 | `single-flow-task-execution`  | **New** — consolidates decomposition, queuing, and review loops |
+| `herdr`                       | **New** — terminal multiplexer & multi-agent orchestration      |
 
 ### Task Tracking
 
-|              | Approach                                                                            |
-| ------------ | ----------------------------------------------------------------------------------- |
-| **Original** | `TodoWrite` tool                                                                    |
-| **Port**     | Live table at `<project-root>/docs/plans/task.md` (created at runtime, not bundled) |
+|              | Approach                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| **Original** | `TodoWrite` tool                                                                                |
+| **Port**     | Native Planning Mode (`implementation_plan.md`) or live table at `<project-root>/docs/plans/task.md` |
 
 ### Tool & Platform Vocabulary
 
 Platform-specific references were translated — the underlying behavior is unchanged:
 
-| Original                 | Antigravity Port                 |
-| ------------------------ | -------------------------------- |
-| `Claude` / `Claude Code` | `Antigravity`                    |
-| `Skill` tool             | `view_file`                      |
-| `TodoWrite`              | Update `docs/plans/task.md`      |
-| `superpowers:<skill>`    | `.agent/skills/<skill>/SKILL.md` |
-| `CLAUDE.md`              | `.agent/AGENTS.md`               |
+| Original                 | Antigravity Port                               |
+| ------------------------ | ---------------------------------------------- |
+| `Claude` / `Claude Code` | `Antigravity`                                  |
+| `Skill` tool             | `view_file`                                    |
+| `TodoWrite`              | Planning Mode / `docs/plans/task.md`           |
+| `superpowers:<skill>`    | `.agents/skills/<skill>/SKILL.md`              |
+| `CLAUDE.md`              | `.agents/AGENTS.md`                            |
 
 ### Skill Adaptations
 
@@ -174,10 +183,11 @@ The rest — `brainstorming`, `test-driven-development`, `verification-before-co
 
 Infrastructure added to make the profile work as a first-class Antigravity citizen:
 
-- `.agent/AGENTS.md` — tool translation contract and execution rules
-- `.agent/workflows/` — workflow entrypoints (`brainstorm.md`, `execute-plan.md`, `write-plan.md`)
-- `.agent/agents/code-reviewer.md` — reviewer agent profile
-- `.agent/tests/` — automated profile validation (skill presence, frontmatter, legacy pattern detection)
+- `.agents/AGENTS.md` — tool translation contract and execution rules
+- `.agents/rules/workflow-discipline.md` — persistent agent behavioral guidelines
+- `.agents/workflows/` — workflow entrypoints (`brainstorm.md`, `execute-plan.md`, `write-plan.md`)
+- `.agents/agents/code-reviewer.md` — reviewer agent profile
+- `.agents/tests/` — automated profile validation (skill presence, frontmatter, legacy pattern detection)
 
 > **Full Diff:** See [ANTIGRAVITY-PORT-DIFFERENCES.md](ANTIGRAVITY-PORT-DIFFERENCES.md) for the exhaustive skill-by-skill comparison and [CURRENT-FLOW.md](CURRENT-FLOW.md) for the complete workflow diagram.
 

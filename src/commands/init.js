@@ -1,10 +1,11 @@
-import { access, cp, rm, stat } from "node:fs/promises";
+import { access, cp, rm, stat, symlink, mkdir } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join, resolve } from "node:path";
+import { homedir } from "node:os";
 
 function getTemplateDir() {
-  return fileURLToPath(new URL("../../templates/.agent", import.meta.url));
+  return fileURLToPath(new URL("../../templates/.agents", import.meta.url));
 }
 
 async function exists(path) {
@@ -20,12 +21,18 @@ function parseInitArgs(args) {
   const parsed = {
     target: ".",
     force: false,
+    global: false,
   };
   let targetSet = false;
 
   for (const arg of args) {
     if (arg === "--force" || arg === "-f") {
       parsed.force = true;
+      continue;
+    }
+
+    if (arg === "--global" || arg === "-g") {
+      parsed.global = true;
       continue;
     }
 
@@ -67,36 +74,73 @@ export async function initCommand(args, { cwd, stdout, stderr }) {
     return 1;
   }
 
-  const targetDir = resolve(cwd, parsed.target);
-  const agentDir = join(targetDir, ".agent");
   const templateDir = getTemplateDir();
+  const templateExists = await exists(templateDir);
+  if (!templateExists) {
+    stderr.write(
+      "Bundled template is missing. Run `npm run sync:template` before using init from source.\n",
+    );
+    return 1;
+  }
+
+  if (parsed.global) {
+    const globalConfigDir = process.env.GEMINI_CONFIG_DIR || join(homedir(), ".gemini", "config");
+    try {
+      await mkdir(globalConfigDir, { recursive: true });
+      const skillsSrc = join(templateDir, "skills");
+      const rulesSrc = join(templateDir, "rules");
+
+      if (await exists(skillsSrc)) {
+        await cp(skillsSrc, join(globalConfigDir, "skills"), { recursive: true });
+      }
+      if (await exists(rulesSrc)) {
+        await cp(rulesSrc, join(globalConfigDir, "rules"), { recursive: true });
+      }
+      stdout.write(`Installed Antigravity Superpowers globally at ${globalConfigDir}\n`);
+      return 0;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      stderr.write(`Global init failed: ${message}\n`);
+      return 1;
+    }
+  }
+
+  const targetDir = resolve(cwd, parsed.target);
+  const agentsDir = join(targetDir, ".agents");
+  const legacyAgentDir = join(targetDir, ".agent");
 
   try {
     await validateTargetDir(targetDir);
 
-    const templateExists = await exists(templateDir);
-    if (!templateExists) {
-      throw new Error(
-        "Bundled template is missing. Run `npm run sync:template` before using init from source.",
-      );
-    }
+    const agentsExists = await exists(agentsDir);
+    const legacyExists = await exists(legacyAgentDir);
 
-    const agentExists = await exists(agentDir);
-    if (agentExists && !parsed.force) {
+    if ((agentsExists || legacyExists) && !parsed.force) {
       stderr.write(
-        `.agent already exists at ${agentDir}. Re-run with --force to replace it.\n`,
+        `.agents already exists at ${agentsDir}. Re-run with --force to replace it.\n`,
       );
       return 1;
     }
 
-    if (agentExists && parsed.force) {
-      await rm(agentDir, { recursive: true, force: true });
+    if (agentsExists && parsed.force) {
+      await rm(agentsDir, { recursive: true, force: true });
+    }
+    if (legacyExists && parsed.force) {
+      await rm(legacyAgentDir, { recursive: true, force: true });
     }
 
-    await cp(templateDir, agentDir, { recursive: true });
+    await cp(templateDir, agentsDir, { recursive: true });
 
-    stdout.write(`Initialized Antigravity Superpowers profile at ${agentDir}\n`);
-    stdout.write("Next step: bash .agent/tests/run-tests.sh\n");
+    // Provide .agent backward-compatibility symlink
+    try {
+      await symlink(".agents", legacyAgentDir, "dir");
+    } catch {
+      // If symlinking fails (e.g. host permission constraints), copy as fallback
+      await cp(agentsDir, legacyAgentDir, { recursive: true });
+    }
+
+    stdout.write(`Initialized Antigravity Superpowers profile at ${agentsDir}\n`);
+    stdout.write("Next step: bash .agents/tests/run-tests.sh\n");
     stdout.write(
       "Note: docs/plans/task.md is created at runtime by skills when task tracking starts.\n",
     );

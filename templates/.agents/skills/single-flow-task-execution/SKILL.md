@@ -11,16 +11,17 @@ Execute plans by working through one task at a time with two-stage review after 
 
 ## Antigravity Execution Model
 
-Antigravity does NOT support parallel coding subagents. All work happens in a single execution thread.
+Antigravity operates in a focused, single-flow execution thread per agent context.
 
 **Rules:**
 
-1. **One active task only** — never work on multiple tasks simultaneously.
-2. **One execution thread only** — no parallel dispatch.
-3. **No parallel coding subagents** — Antigravity does not have `Task(...)`.
-4. **Browser automation** may use `browser_subagent` in isolated steps.
-5. **Track progress** by updating `<project-root>/docs/plans/task.md` at each state change (table-only tracker).
-6. **Use `task_boundary`** to clearly delineate each unit of work.
+1. **One active task only** — never work on multiple tasks simultaneously within the primary flow.
+2. **One primary execution thread** — sequential step execution ensures deterministic, high-quality output.
+3. **No phantom dispatch** — Antigravity does not have phantom subagent dispatch tools. Use official tools (`run_command`, `browser_subagent`, `manage_task`, `schedule`).
+4. **Herdr Multi-Agent Orchestration** — When running inside Herdr (`HERDR_ENV=1`), multi-agent delegation across sibling panes is available via the `herdr` skill (`herdr agent start`, `herdr pane split`).
+5. **Browser automation** — Use `browser_subagent` for isolated browser tasks.
+6. **Track progress** — Update native planning artifacts (`implementation_plan.md`, `walkthrough.md`) and/or `<project-root>/docs/plans/task.md` at each state change.
+7. **Structured task units** — Clearly delineate each unit of work with an explicit task brief and verification plan.
 
 ## When to Use
 
@@ -59,7 +60,7 @@ digraph when_to_use {
 **vs. Executing Plans (worktree-based):**
 
 - Same session (no context switch)
-- Fresh `task_boundary` per task (clean scope)
+- Clear task scope per iteration (clean scope)
 - Two-stage review after each task: spec compliance first, then code quality
 - Faster iteration (no human-in-loop between tasks)
 
@@ -149,33 +150,32 @@ After all tasks:
 
 For each task, prepare:
 
+```markdown
+### Task Step: Implement Task N: [task name]
+
+#### Task Description
+[FULL TEXT of task from plan — paste it here]
+
+#### Context
+[Where this fits, dependencies, architectural context]
+
+#### Constraints
+- Only modify [specific files/directories]
+- Follow existing patterns in the codebase
+- Write tests for new functionality
+
+#### Verification
+- Run: [specific test command]
+- Expected: [what success looks like]
 ```
-task_boundary:
-  description: "Implement Task N: [task name]"
-  prompt: |
-    ## Task Description
-    [FULL TEXT of task from plan — paste it here]
 
-    ## Context
-    [Where this fits, dependencies, architectural context]
-
-    ## Constraints
-    - Only modify [specific files/directories]
-    - Follow existing patterns in the codebase
-    - Write tests for new functionality
-
-    ## Verification
-    - Run: [specific test command]
-    - Expected: [what success looks like]
-```
-
-**Key:** Provide full task text and context upfront. Don't make the task boundary re-read the plan file.
+**Key:** Provide full task text and context upfront. Don't make the execution step re-read the plan file.
 
 ## Review Templates
 
 This skill includes prompt templates for structured reviews:
 
-- **`./implementer-prompt.md`** — Template for implementation task boundaries
+- **`./implementer-prompt.md`** — Template for implementation steps
 - **`./spec-reviewer-prompt.md`** — Template for spec compliance review (did we build what was requested?)
 - **`./code-quality-reviewer-prompt.md`** — Template for code quality review (is it well-built?)
 

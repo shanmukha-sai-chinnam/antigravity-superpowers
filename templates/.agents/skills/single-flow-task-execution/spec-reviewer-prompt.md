@@ -4,11 +4,10 @@ Use this template when running a spec compliance review step in single-flow mode
 
 **Purpose:** Verify implementer built what was requested (nothing more, nothing less)
 
-```
-task_boundary:
-  description: "Review spec compliance for Task N"
-  prompt: |
-    You are reviewing whether an implementation matches its specification.
+```markdown
+### Review Step: Review spec compliance for Task N
+
+You are reviewing whether an implementation matches its specification.
 
     ## What Was Requested
 

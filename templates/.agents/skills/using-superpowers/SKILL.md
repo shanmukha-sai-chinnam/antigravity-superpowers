@@ -13,7 +13,7 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 ## How to Access Skills
 
-**In Antigravity:** Use `view_file` to load a skill from `.agent/skills/<skill-name>/SKILL.md` (or `~/.gemini/skills/<skill-name>/SKILL.md` when needed). When you load a skill, follow it directly.
+**In Antigravity:** Use `view_file` to load a skill from `.agents/skills/<skill-name>/SKILL.md` (or `~/.gemini/config/skills/<skill-name>/SKILL.md`, or built-in skills when available). When you load a skill, follow it directly.
 
 **In other environments:** Check your platform's documentation for how skills are loaded.
 
