@@ -22,6 +22,9 @@ const required = [
   "bin/antigravity-superpowers.js",
   "src/cli.js",
   "src/commands/init.js",
+  "src/commands/check.js",
+  "src/commands/doctor.js",
+  "src/commands/sync.js",
   "templates/.agents/AGENTS.md",
   "templates/.agents/rules/workflow-discipline.md",
   "templates/.agents/INSTALL.md",
@@ -41,6 +44,12 @@ const required = [
   "templates/.agents/skills/writing-plans/SKILL.md",
   "templates/.agents/skills/test-driven-development/SKILL.md",
   "templates/.agents/skills/herdr/SKILL.md",
+  "templates/.agents/skills/nixos-system-rebuild/SKILL.md",
+  "templates/.agents/skills/nix-flake-management/SKILL.md",
+  "templates/.agents/skills/nix-derivation-debugging/SKILL.md",
+  "templates/.agents/skills/nix-code-audit/SKILL.md",
+  "templates/.agents/mcp/mcp_config.json",
+  "templates/.agents/hooks/hooks.json",
 ];
 
 const missing = required.filter((path) => !packagedPaths.has(path));

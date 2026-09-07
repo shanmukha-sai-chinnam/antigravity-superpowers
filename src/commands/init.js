@@ -1,4 +1,4 @@
-import { access, cp, rm, stat, symlink, mkdir } from "node:fs/promises";
+import { access, cp, rm, stat, symlink, mkdir, writeFile } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join, resolve } from "node:path";
@@ -22,6 +22,9 @@ function parseInitArgs(args) {
     target: ".",
     force: false,
     global: false,
+    nix: false,
+    mcp: false,
+    hooks: false,
   };
   let targetSet = false;
 
@@ -33,6 +36,21 @@ function parseInitArgs(args) {
 
     if (arg === "--global" || arg === "-g") {
       parsed.global = true;
+      continue;
+    }
+
+    if (arg === "--nix" || arg === "-n") {
+      parsed.nix = true;
+      continue;
+    }
+
+    if (arg === "--mcp" || arg === "-m") {
+      parsed.mcp = true;
+      continue;
+    }
+
+    if (arg === "--hooks") {
+      parsed.hooks = true;
       continue;
     }
 
@@ -63,6 +81,38 @@ async function validateTargetDir(targetDir) {
     throw new Error(`Target path is not a directory: ${targetDir}`);
   }
 }
+
+const NIX_TEMPLATE_FLAKE = `{
+  description = "Nix developer environment";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
+
+  outputs = { self, nixpkgs, flake-utils }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = nixpkgs.legacyPackages.\${system};
+      in {
+        devShells.default = pkgs.mkShell {
+          packages = with pkgs; [
+            git
+            ripgrep
+            alejandra
+            statix
+            deadnix
+            herdr
+          ];
+
+          shellHook = ''
+            echo "⚡ Nix developer shell active."
+          '';
+        };
+      }
+    );
+}
+`;
 
 export async function initCommand(args, { cwd, stdout, stderr }) {
   let parsed;
@@ -95,6 +145,15 @@ export async function initCommand(args, { cwd, stdout, stderr }) {
       }
       if (await exists(rulesSrc)) {
         await cp(rulesSrc, join(globalConfigDir, "rules"), { recursive: true });
+      }
+      if (parsed.mcp && (await exists(join(templateDir, "mcp", "mcp_config.json")))) {
+        await cp(
+          join(templateDir, "mcp", "mcp_config.json"),
+          join(globalConfigDir, "mcp_config.json"),
+        );
+      }
+      if (parsed.hooks && (await exists(join(templateDir, "hooks")))) {
+        await cp(join(templateDir, "hooks"), join(globalConfigDir, "hooks"), { recursive: true });
       }
       stdout.write(`Installed Antigravity Superpowers globally at ${globalConfigDir}\n`);
       return 0;
@@ -130,6 +189,34 @@ export async function initCommand(args, { cwd, stdout, stderr }) {
     }
 
     await cp(templateDir, agentsDir, { recursive: true });
+
+    // Optional Nix integration
+    if (parsed.nix) {
+      const targetFlake = join(targetDir, "flake.nix");
+      const targetEnvrc = join(targetDir, ".envrc");
+      if (!(await exists(targetFlake))) {
+        await writeFile(targetFlake, NIX_TEMPLATE_FLAKE, "utf8");
+        stdout.write("Created template flake.nix\n");
+      }
+      if (!(await exists(targetEnvrc))) {
+        await writeFile(targetEnvrc, "use flake\n", "utf8");
+        stdout.write("Created .envrc\n");
+      }
+    }
+
+    // Optional MCP configuration
+    if (parsed.mcp && (await exists(join(templateDir, "mcp", "mcp_config.json")))) {
+      await cp(
+        join(templateDir, "mcp", "mcp_config.json"),
+        join(agentsDir, "mcp_config.json"),
+      );
+      stdout.write("Configured MCP servers at .agents/mcp_config.json\n");
+    }
+
+    // Optional Hooks configuration
+    if (parsed.hooks && (await exists(join(templateDir, "hooks")))) {
+      stdout.write("Configured lifecycle hooks at .agents/hooks/\n");
+    }
 
     // Provide .agent backward-compatibility symlink
     try {

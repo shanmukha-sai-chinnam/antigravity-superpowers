@@ -41,67 +41,69 @@ This port brings **14 skills** covering the full development lifecycle, updated 
 
 ## What's Included
 
-**14 skills** covering the full development lifecycle:
+**18 skills** covering the full development lifecycle, Antigravity 2.0 swarms, and NixOS systems engineering:
 
-| Skill                            | Description                                             |
-| -------------------------------- | ------------------------------------------------------- |
-| `brainstorming`                  | Structured exploration before committing to an approach |
-| `writing-plans`                  | Detailed, step-by-step implementation plans             |
-| `executing-plans`                | Disciplined plan execution with progress tracking       |
-| `single-flow-task-execution`     | Ordered task decomposition with review gates            |
-| `herdr`                          | Terminal multiplexer & multi-agent orchestration _(new)_|
-| `test-driven-development`        | Write tests first, implement second                     |
-| `systematic-debugging`           | Root cause tracing with supporting techniques           |
-| `requesting-code-review`         | Structured review flow with checklists                  |
-| `receiving-code-review`          | Handling feedback systematically                        |
-| `verification-before-completion` | Prove it works before claiming it's done                |
-| `finishing-a-development-branch` | Clean branch wrap-up with workflow options              |
-| `using-git-worktrees`            | Parallel branch management                              |
-| `using-superpowers`              | Skill routing and session bootstrap                     |
-| `writing-skills`                 | Create new skills that follow the system's conventions  |
+| Skill                            | Category         | Description                                             |
+| -------------------------------- | ---------------- | ------------------------------------------------------- |
+| `brainstorming`                  | Process          | Structured exploration before committing to an approach |
+| `writing-plans`                  | Process          | Detailed, step-by-step implementation plans             |
+| `executing-plans`                | Execution        | Disciplined plan execution with progress tracking       |
+| `single-flow-task-execution`     | Execution        | Ordered task decomposition with review gates            |
+| `herdr`                          | Orchestration    | Terminal multiplexer & multi-agent swarms (Trio Flow)   |
+| `test-driven-development`        | Quality          | Write tests first, implement second                     |
+| `systematic-debugging`           | Debugging        | Root cause tracing with supporting techniques           |
+| `nixos-system-rebuild`           | NixOS / Systems  | Safe declarative rebuilds, diffs, and auto-rollback     |
+| `nix-flake-management`           | Nix / Packaging  | Flake authoring, input pinning, and devShells           |
+| `nix-derivation-debugging`       | Nix / Packaging  | Systematic stdenv phase and dynamic linker debugging    |
+| `nix-code-audit`                 | Nix / Linting    | Alejandra, Statix, Deadnix static validation pipeline   |
+| `requesting-code-review`         | Review           | Structured review flow with checklists                  |
+| `receiving-code-review`          | Review           | Handling feedback systematically                        |
+| `verification-before-completion` | Quality          | Prove it works before claiming it's done                |
+| `finishing-a-development-branch` | Git              | Clean branch wrap-up with workflow options              |
+| `using-git-worktrees`            | Git              | Parallel branch management                              |
+| `using-superpowers`              | Core             | Skill routing and session bootstrap                     |
+| `writing-skills`                 | Authoring        | Create new skills that follow the system's conventions  |
 
-Plus supporting infrastructure: workflows, rules (`workflow-discipline.md`), agents, validation tests, and an `AGENTS.md` contract that ties it all together.
+Plus supporting infrastructure: declarative MCP server configurations (`mcp_config.json`), lifecycle automation hooks (`hooks.json`), workflows, rules (`workflow-discipline.md`), validation tests, and an `AGENTS.md` contract.
 
 ---
 
 ## Quick Start
 
+### Via NPX:
 ```bash
 # Scaffold the .agents profile into your project
 npx antigravity-superpowers init
+
+# Or include full Nix environment, MCP servers, and lifecycle hooks:
+npx antigravity-superpowers init --nix --mcp --hooks
 ```
 
-Or install globally into `~/.gemini/config`:
-
+### Via Nix:
 ```bash
-npx antigravity-superpowers init --global
+# Run CLI directly via Nix Flake
+nix run github:shanmukha-sai-chinnam/antigravity-superpowers -- init
+
+# Enter full development shell with linters and Herdr
+nix develop github:shanmukha-sai-chinnam/antigravity-superpowers
 ```
 
-### Options
-
+### Global Installation:
 ```bash
-# Initialize in current directory (.agents and .agent symlink)
-antigravity-superpowers init
+# Install globally into ~/.gemini/config
+npx antigravity-superpowers init --global --mcp --hooks
+```
 
-# Initialize in a specific project
-antigravity-superpowers init /path/to/project
+### CLI Commands:
+```bash
+# Diagnostic health check of Nix, Herdr, Node, and Agent environment
+antigravity-superpowers doctor
 
-# Replace an existing profile
-antigravity-superpowers init --force
-
-# Install globally to ~/.gemini/config
-antigravity-superpowers init --global
-
-# Verify profile integrity
+# Validate installed profile integrity (106 checks)
 antigravity-superpowers check
-```
 
-After init, verify everything is wired up:
-
-```bash
-antigravity-superpowers check
-# or
-bash .agents/tests/run-tests.sh
+# Synchronize latest skills and rules without overwriting custom project files
+antigravity-superpowers sync
 ```
 
 ---

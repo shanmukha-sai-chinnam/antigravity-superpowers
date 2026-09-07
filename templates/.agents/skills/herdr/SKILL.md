@@ -187,9 +187,18 @@ After that failed read, ask the agent to write its complete response as Markdown
 ## Safety and coordination rules
 
 - Use `--no-focus` for background work unless the user asked to switch context.
-- Use `--current`, an explicit pane ID, or a unique agent name. Do not rely on another client's focused pane.
-- Parse IDs from JSON responses. Do not derive them from sidebar order or examples.
-- Do not close workspaces, tabs, panes, or sessions you did not create unless the user explicitly asked.
-- Never run `herdr server stop` from an active session unless the user explicitly intends to stop the server and its pane processes.
-- Never kill the main Herdr process. Use named test sessions for experiments that need an isolated server.
 - CLI server errors are JSON on stderr with exit status 1. CLI syntax errors exit with status 2.
+
+## Multi-Agent Swarm Presets (Trio Architecture)
+
+When tackling large, complex coding workflows, initialize the collaborative Trio Architecture:
+
+1. **Pane 1 (Current)**: Lead / Architect agent operates in native Planning Mode, designing specifications and monitoring review gates.
+2. **Pane 2**: Dedicated Implementer agent running in a fresh, isolated `nix develop` shell.
+3. **Pane 3**: Continuous Watcher running test runners (`cargo watch`, `npm test -- --watch`, `pytest-watch`, or flake evaluation loops).
+
+To launch automatically:
+```bash
+bash .agents/skills/herdr/herdr-swarm-init.sh
+```
+

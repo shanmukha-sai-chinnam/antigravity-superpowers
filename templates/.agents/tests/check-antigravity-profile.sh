@@ -76,6 +76,10 @@ required_skills=(
   "writing-skills"
   "single-flow-task-execution"
   "herdr"
+  "nixos-system-rebuild"
+  "nix-flake-management"
+  "nix-derivation-debugging"
+  "nix-code-audit"
 )
 
 for skill in "${required_skills[@]}"; do
