@@ -69,8 +69,8 @@ To launch directly into NixOS-WSL with the Herdr persistent session, configure t
 ```json
 {
   "guid": "{58dae4c9-5a10-4e4d-a2f0-63aee93b76a8}",
-  "name": "NixOS (Herdr Swarm)",
-  "commandline": "wsl.exe -d NixOS -u damathryxx64 -e herdr",
+  "name": "NixOS",
+  "commandline": "wsl.exe -d NixOS -u damathryxx64 -e bash -l",
   "startingDirectory": "\\\\wsl.localhost\\NixOS\\home\\damathryxx64\\repositories",
   "font": {
     "face": "Cascadia Code NF",

@@ -134,8 +134,8 @@ systemctl --user --failed
 # Check system systemd units
 systemctl --failed
 
-# Check active AI tools & Herdr hooks
-herdr integration status
+# Check active agent skills sync status
+dots-sync-skills status
 ```
 
 ## Phase 6: Automated Rollback Procedure

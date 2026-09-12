@@ -18,10 +18,9 @@ Antigravity operates in a focused, single-flow execution thread per agent contex
 1. **One active task only** — never work on multiple tasks simultaneously within the primary flow.
 2. **One primary execution thread** — sequential step execution ensures deterministic, high-quality output.
 3. **No phantom dispatch** — Antigravity does not have phantom subagent dispatch tools. Use official tools (`run_command`, `browser_subagent`, `manage_task`, `schedule`).
-4. **Herdr Multi-Agent Orchestration** — When running inside Herdr (`HERDR_ENV=1`), multi-agent delegation across sibling panes is available via the `herdr` skill (`herdr agent start`, `herdr pane split`).
-5. **Browser automation** — Use `browser_subagent` for isolated browser tasks.
-6. **Track progress** — Update native planning artifacts (`implementation_plan.md`, `walkthrough.md`) and/or `<project-root>/docs/plans/task.md` at each state change.
-7. **Structured task units** — Clearly delineate each unit of work with an explicit task brief and verification plan.
+4. **Browser automation** — Use `browser_subagent` for isolated browser tasks.
+5. **Track progress** — Update native planning artifacts (`implementation_plan.md`, `walkthrough.md`) and/or `<project-root>/docs/plans/task.md` at each state change.
+6. **Structured task units** — Clearly delineate each unit of work with an explicit task brief and verification plan.
 
 ## When to Use
 

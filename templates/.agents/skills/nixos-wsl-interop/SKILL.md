@@ -106,8 +106,7 @@ loginctl enable-linger damathryxx64
 ```
 Verify user systemd units:
 ```bash
-systemctl --user status herdr-integrations.service
-systemctl --user status antigravity-superpowers-sync.service
+systemctl --user status agent-skills-sync.service
 ```
 
 ## GUI & Display Integration (WSLg)

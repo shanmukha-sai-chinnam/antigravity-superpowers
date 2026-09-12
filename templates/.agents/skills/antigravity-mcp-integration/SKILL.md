@@ -20,10 +20,10 @@ Model Context Protocol (MCP) exposes tools, resources, and prompt templates over
 │ Antigravity Superpowers MCP Server     │
 │ (`antigravity-superpowers mcp serve`)  │
 ├───────────────────┬────────────────────┤
-│ NixOS Tools       │ Herdr Mux          │
-│ - nixos_options   │ - herdr_pane_list  │
-│ - nixos_diff      │ - herdr_send_cmd   │
-│ - nixos_service   │ - quota_info       │
+│ NixOS Tools       │ Core Superpowers   │
+│ - nixos_options   │ - codebase_audit   │
+│ - nixos_diff      │ - quota_info       │
+│ - nixos_service   │ - skill_read       │
 └───────────────────┴────────────────────┘
 ```
 
@@ -61,15 +61,11 @@ antigravity-superpowers mcp config
    - Queries `systemctl status` or `systemctl --user status` for any system service with journal logs.
 3. **`nixos_option_query`**:
    - Retrieves NixOS option documentation and schemas.
-4. **`herdr_pane_list`**:
-   - Lists active Herdr panes, processes, and agent integration state.
-5. **`herdr_send_command`**:
-   - Sends shell commands or keystrokes to a target Herdr pane.
-6. **`superpowers_skill_read`**:
+4. **`superpowers_skill_read`**:
    - Reads the complete SKILL.md for any installed skill on-demand.
-7. **`antigravity_quota_info`**:
+5. **`antigravity_quota_info`**:
    - Retrieves active model quotas, remaining request allowances, and countdown timers.
-8. **`codebase_audit`**:
+6. **`codebase_audit`**:
    - Runs Alejandra, Statix, Deadnix, and profile checks in one call.
 
 ## Debugging MCP Servers
