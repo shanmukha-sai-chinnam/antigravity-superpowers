@@ -17,7 +17,7 @@
 
 ---
 
-Superpowers is an incredible skill-based workflow system that gives AI coding assistants structured, reliable behavior — brainstorming, planning, test-driven development, code review, debugging, and more. It was originally designed for Claude Code, but the workflows themselves are platform-agnostic gold.
+Superpowers is an incredible skill-based workflow system that gives AI coding assistants structured, reliable behavior — brainstorming, planning, test-driven development, code review, debugging, and more. The workflows themselves are platform-agnostic gold.
 
 **This project ports that entire system to modern Antigravity 2.0**, preserving the original flow as faithfully as possible while leveraging modern Antigravity capabilities: native Planning Mode artifacts, rich tool translation contracts, and `.agents` discovery.
 
@@ -183,11 +183,11 @@ Platform-specific references were translated — the underlying behavior is unch
 
 | Original                 | Antigravity Port                               |
 | ------------------------ | ---------------------------------------------- |
-| `Claude` / `Claude Code` | `Antigravity`                                  |
+| Legacy Agent CLI         | `Antigravity`                                  |
 | `Skill` tool             | `view_file`                                    |
 | `TodoWrite`              | Planning Mode / `docs/plans/task.md`           |
 | `superpowers:<skill>`    | `.agents/skills/<skill>/SKILL.md`              |
-| `CLAUDE.md`              | `.agents/AGENTS.md`                            |
+| Legacy project rules     | `.agents/AGENTS.md`                            |
 
 ### Skill Adaptations
 

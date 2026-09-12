@@ -2,7 +2,7 @@
 
 This document details the architecture and evolution between:
 
-- Original skill set: `skills/` (designed for Claude Code)
+- Original skill set: `skills/` (legacy framework)
 - Modern Antigravity Superpowers: `templates/.agents/` + CLI + Nix Flake + Native Planning Mode
 
 ---
@@ -21,11 +21,11 @@ This document details the architecture and evolution between:
 - **Task Tracking**:
   - Legacy `TodoWrite` replaced with native Planning Mode artifacts or project-root `<project-root>/.agents/task.md`.
 - **Platform & Tool Vocabulary Translation**:
-  - `Claude / Claude Code` -> `Antigravity`
+  - `Legacy CLI` -> `Antigravity`
   - `Skill tool` -> `view_file` on `SKILL.md`
   - `browser` tasks -> `browser_subagent`
   - `superpowers:<skill>` -> `.agents/skills/<skill>/SKILL.md`
-  - `CLAUDE.md` -> `.agents/AGENTS.md`
+  - Legacy project rules -> `.agents/AGENTS.md`
 
 ---
 
@@ -59,7 +59,7 @@ This document details the architecture and evolution between:
 
 ## 3) Tool Surface Comparison
 
-| Original Claude Code Tool | Antigravity Native Equivalent |
+| Legacy Agent Tool | Antigravity Native Equivalent |
 | :--- | :--- |
 | `Skill` | `view_file` |
 | `Task` (coding subagent) | Planning Mode task breakdown (`implementation_plan.md`) |
