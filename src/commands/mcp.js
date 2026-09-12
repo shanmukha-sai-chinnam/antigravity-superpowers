@@ -25,13 +25,13 @@ const TOOLS = [
   {
     name: "nixos_service_status",
     description:
-      "Query systemd service status in NixOS (e.g. herdr-integrations, antigravity-superpowers-sync, dbus).",
+      "Query systemd service status in NixOS (e.g. agent-skills-sync, dbus, nix-daemon).",
     inputSchema: {
       type: "object",
       properties: {
         service: {
           type: "string",
-          description: "Name of the service (e.g. 'herdr-integrations.service')",
+          description: "Name of the service (e.g. 'agent-skills-sync.service')",
         },
         userScope: {
           type: "boolean",
@@ -64,7 +64,7 @@ const TOOLS = [
       properties: {
         skillName: {
           type: "string",
-          description: "Name of the skill (e.g. 'nixos-system-rebuild', 'herdr', 'brainstorming')",
+          description: "Name of the skill (e.g. 'nixos-system-rebuild', 'brainstorming')",
         },
       },
       required: ["skillName"],

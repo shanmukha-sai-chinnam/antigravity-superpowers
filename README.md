@@ -19,7 +19,7 @@
 
 Superpowers is an incredible skill-based workflow system that gives AI coding assistants structured, reliable behavior — brainstorming, planning, test-driven development, code review, debugging, and more. It was originally designed for Claude Code, but the workflows themselves are platform-agnostic gold.
 
-**This project ports that entire system to modern Antigravity 2.0**, preserving the original flow as faithfully as possible while leveraging modern Antigravity capabilities: native Planning Mode artifacts, rich tool translation contracts, `.agents` discovery, and Herdr multi-agent orchestration.
+**This project ports that entire system to modern Antigravity 2.0**, preserving the original flow as faithfully as possible while leveraging modern Antigravity capabilities: native Planning Mode artifacts, rich tool translation contracts, and `.agents` discovery.
 
 > **One command. Full profile. Ready to go.**
 
@@ -35,13 +35,13 @@ The original Superpowers repo doesn't support Antigravity, and there's no offici
 
 This is my attempt to bring the full Superpowers skill set to Antigravity — as close to the original as possible. The goal was never to fork and diverge; it was to translate just enough to make everything work natively on a different platform. Superpowers skills bring real structure to AI-assisted development — brainstorming before implementation, planning before coding, verification before completion claims — and that discipline shouldn't be locked to one platform.
 
-This port brings **23 skills** covering the full development lifecycle, updated for modern Antigravity 2.0 and NixOS-WSL:
+This port brings **21 skills** covering the full development lifecycle, updated for modern Antigravity 2.0 and NixOS-WSL:
 
 ---
 
 ## What's Included
 
-**23 skills** covering the full development lifecycle, Antigravity 2.0 swarms, MCP integrations, NixOS systems engineering, and WSL host interoperability:
+**21 skills** covering the full development lifecycle, Planning Mode discipline, MCP integrations, NixOS systems engineering, and WSL host interoperability:
 
 | Skill                             | Category          | Description                                              |
 | --------------------------------- | ----------------- | -------------------------------------------------------- |
@@ -49,8 +49,6 @@ This port brings **23 skills** covering the full development lifecycle, updated 
 | `writing-plans`                   | Process           | Detailed, step-by-step implementation plans              |
 | `executing-plans`                 | Execution         | Disciplined plan execution with progress tracking        |
 | `single-flow-task-execution`      | Execution         | Ordered task decomposition with review gates             |
-| `herdr`                           | Orchestration     | Terminal multiplexer & multi-agent swarms (Trio Flow)    |
-| `herdr-multi-agent-orchestration` | Orchestration     | Swarm roles (Architect, Implementer, Watcher) & IPC      |
 | `antigravity-mcp-integration`     | Protocol / Tools  | Model Context Protocol STDIO JSON-RPC server integration |
 | `continuous-codebase-watching`    | Verifier / Daemon | Sub-second linter, formatter, and test feedback          |
 | `nixos-system-rebuild`            | NixOS / Systems   | Safe declarative rebuilds, diffs, and auto-rollback      |
@@ -69,7 +67,7 @@ This port brings **23 skills** covering the full development lifecycle, updated 
 | `using-superpowers`               | Core              | Skill routing and session bootstrap                      |
 | `writing-skills`                  | Authoring         | Create new skills that follow the system's conventions   |
 
-Plus supporting infrastructure: native Model Context Protocol server (`antigravity-superpowers mcp serve`), Herdr swarm orchestration (`antigravity-superpowers swarm`), continuous codebase watcher (`antigravity-superpowers watch`), live model quota inspector (`antigravity-superpowers quota`), workspace presets (`antigravity-superpowers preset`), declarative MCP configurations (`mcp_config.json`), lifecycle automation hooks (`hooks.json`), workflows, rules (`workflow-discipline.md`), validation tests (127 checks), and an `AGENTS.md` contract.
+Plus supporting infrastructure: native Model Context Protocol server (`antigravity-superpowers mcp serve`), continuous codebase watcher (`antigravity-superpowers watch`), live model quota inspector (`antigravity-superpowers quota`), workspace presets (`antigravity-superpowers preset`), declarative MCP configurations (`mcp_config.json`), lifecycle automation hooks (`hooks.json`), workflows, rules (`workflow-discipline.md`), validation tests (118 checks), and an `AGENTS.md` contract.
 
 ---
 
@@ -89,7 +87,7 @@ npx antigravity-superpowers init --nix --mcp --hooks
 # Run CLI directly via Nix Flake
 nix run github:shanmukha-sai-chinnam/antigravity-superpowers -- init
 
-# Enter full development shell with linters and Herdr
+# Enter full development shell with linters
 nix develop github:shanmukha-sai-chinnam/antigravity-superpowers
 ```
 
@@ -101,7 +99,7 @@ npx antigravity-superpowers init --global --mcp --hooks
 
 ### Power CLI Commands:
 ```bash
-# Diagnostic health check of Nix, Herdr, Node, Git, and Agent environment
+# Diagnostic health check of Nix, Node, Git, and Agent environment
 antigravity-superpowers doctor
 
 # Validate installed profile integrity (118 checks)
@@ -110,11 +108,8 @@ antigravity-superpowers check
 # Synchronize latest skills and rules without overwriting custom project files
 antigravity-superpowers sync
 
-# Launch Model Context Protocol server providing NixOS and Herdr tools
+# Launch Model Context Protocol server providing NixOS tools
 antigravity-superpowers mcp serve
-
-# Spin up a Herdr multi-agent swarm (Trio Architecture: Architect + Implementer + Watcher)
-antigravity-superpowers swarm start --preset trio
 
 # Start continuous watcher with auto-formatting and static linters
 antigravity-superpowers watch --fix
@@ -167,14 +162,13 @@ Session Start → Load AGENTS.md → Load using-superpowers
 
 ### Execution Model
 
-The one notable structural change. The original Superpowers dispatches multiple coding subagents in parallel — but Antigravity doesn't support parallel subagent execution. So the two skills that relied on that capability (`dispatching-parallel-agents` and `subagent-driven-development`) couldn't be ported as-is. Instead, they were consolidated into a single new skill — **`single-flow-task-execution`** — which preserves the same decomposition logic, task queuing, and review gates, just executed sequentially rather than in parallel. In addition, for environments with Herdr terminal multiplexing (`HERDR_ENV=1`), multi-agent delegation across sibling panes is natively available via the `herdr` skill.
+The one notable structural change. The original Superpowers dispatches multiple coding subagents in parallel — but Antigravity doesn't support parallel subagent execution. So the two skills that relied on that capability (`dispatching-parallel-agents` and `subagent-driven-development`) couldn't be ported as-is. Instead, they were consolidated into a single new skill — **`single-flow-task-execution`** — which preserves the same decomposition logic, task queuing, and review gates, just executed sequentially rather than in parallel.
 
 | Original Skill                | What Happened                                                   |
 | ----------------------------- | --------------------------------------------------------------- |
 | `dispatching-parallel-agents` | Merged into `single-flow-task-execution`                        |
 | `subagent-driven-development` | Merged into `single-flow-task-execution`                        |
 | `single-flow-task-execution`  | **New** — consolidates decomposition, queuing, and review loops |
-| `herdr`                       | **New** — terminal multiplexer & multi-agent orchestration      |
 
 ### Task Tracking
 

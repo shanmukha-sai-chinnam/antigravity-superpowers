@@ -143,7 +143,6 @@ const NIX_TEMPLATE_FLAKE = `{
             alejandra
             statix
             deadnix
-            herdr
           ];
 
           shellHook = ''

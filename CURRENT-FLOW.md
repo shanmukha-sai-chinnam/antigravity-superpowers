@@ -9,7 +9,6 @@ This document explains the active end-to-end workflow utilized by the Antigravit
 1. Load guidelines from `.agents/AGENTS.md` (or fallback `~/.gemini/config/AGENTS.md`).
 2. Load skill router: `.agents/skills/using-superpowers/SKILL.md`.
 3. Check environment flags:
-   - If `test "${HERDR_ENV:-}" = 1`: enable Herdr multi-agent orchestration tools.
    - If `command -v wslpath`: enable NixOS-WSL host bridging and interop skills.
 4. Discover and load active MCP tools from `.agents/mcp_config.json` or `~/.gemini/config/mcp_config.json`.
 
@@ -27,10 +26,6 @@ For each incoming user request:
    - Generate `implementation_plan.md` in Planning Mode and request feedback.
 3. **Execution**:
    - Single-flow mode: sequential execution with review gates (`single-flow-task-execution`).
-   - Swarm mode (`HERDR_ENV=1`): deploy Trio Swarm (`herdr-multi-agent-orchestration`):
-     - Pane 1: Architect (planning & design review)
-     - Pane 2: Implementer (Nix devShell worker)
-     - Pane 3: Watcher (`antigravity-superpowers watch --fix`)
 4. **Systems & NixOS Rebuild**:
    - Run `nixos-system-rebuild` with pre-flight checks, 5-stage validation, closure diffing, and switch.
 5. **WSL2 / Windows Host Interop**:
@@ -55,8 +50,6 @@ Before claiming completion:
 flowchart TD
     Start[Session Start] --> LoadAGENTS[Load .agents/AGENTS.md & using-superpowers]
     LoadAGENTS --> EnvironmentCheck{Detect Environment}
-    
-    EnvironmentCheck -->|Herdr Mux| HerdrFlow[Enable Herdr Multi-Agent Swarms]
     EnvironmentCheck -->|NixOS-WSL| WSLFlow[Enable nixos-wsl-interop & host bridge]
     EnvironmentCheck -->|Standard IDE| PlanMode[Enable Antigravity Planning Mode]
 
@@ -67,12 +60,8 @@ flowchart TD
     Brainstorm --> WritePlan[writing-plans -> implementation_plan.md]
     WritePlan --> UserApproval{User Approval Gate}
 
-    UserApproval -->|Approved| Execution{Execution Architecture}
-    Execution -->|Single-Flow| SingleExec[single-flow-task-execution with TDD]
-    Execution -->|Herdr Swarm| TrioSwarm[Architect + Nix Worker + Continuous Watcher]
-
+    UserApproval -->|Approved| SingleExec[single-flow-task-execution with TDD]
     SingleExec --> VerifyGate[verification-before-completion]
-    TrioSwarm --> VerifyGate
 
     VerifyGate -->|Passing Evidence| Walkthrough[Update walkthrough.md]
     Walkthrough --> FinishBranch[finishing-a-development-branch]
