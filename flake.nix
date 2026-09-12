@@ -67,7 +67,6 @@
           alejandra
           statix
           deadnix
-          herdr
         ];
 
         shellHook = ''

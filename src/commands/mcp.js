@@ -56,39 +56,6 @@ const TOOLS = [
     },
   },
   {
-    name: "herdr_pane_list",
-    description:
-      "Inspect Herdr terminal multiplexer status, active windows, panes, and agent integrations.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        verbose: {
-          type: "boolean",
-          description: "Include extended agent integration status",
-        },
-      },
-    },
-  },
-  {
-    name: "herdr_send_command",
-    description:
-      "Send a command or text input to a specific Herdr terminal pane.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        target: {
-          type: "string",
-          description: "Target pane identifier (e.g. '2' or '%2')",
-        },
-        command: {
-          type: "string",
-          description: "Command string to execute in the pane",
-        },
-      },
-      required: ["target", "command"],
-    },
-  },
-  {
     name: "superpowers_skill_read",
     description:
       "Retrieve full runbook, instructions, and prompt templates for an Antigravity Superpowers skill.",
@@ -185,49 +152,6 @@ async function handleToolCall(name, args = {}, cwd = process.cwd()) {
         return { content: [{ type: "text", text: stdout || stderr }] };
       }
 
-      case "herdr_pane_list": {
-        let output = "";
-        try {
-          const { stdout: statusOut } = await execFileAsync("herdr", ["status"]);
-          output += `=== Herdr Status ===\n${statusOut}\n\n`;
-        } catch {
-          output += "=== Herdr Status ===\nHerdr multiplexer not running or not found in PATH.\n\n";
-        }
-
-        if (args.verbose) {
-          try {
-            const { stdout: integOut } = await execFileAsync("herdr", [
-              "integration",
-              "status",
-            ]);
-            output += `=== Herdr Integrations ===\n${integOut}\n`;
-          } catch {
-            // ignore
-          }
-        }
-        return { content: [{ type: "text", text: output.trim() }] };
-      }
-
-      case "herdr_send_command": {
-        const { target, command } = args;
-        const { stdout, stderr } = await execFileAsync("herdr", [
-          "pane",
-          "send-text",
-          target,
-          `${command}\n`,
-        ]).catch((err) => ({
-          stdout: err.stdout || "",
-          stderr: err.stderr || err.message,
-        }));
-        return {
-          content: [
-            {
-              type: "text",
-              text: stdout || stderr || `Command dispatched to Herdr pane ${target}`,
-            },
-          ],
-        };
-      }
 
       case "superpowers_skill_read": {
         const skill = args.skillName.trim();

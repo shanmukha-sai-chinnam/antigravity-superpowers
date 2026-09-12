@@ -88,7 +88,7 @@ After all tasks complete and verified:
 - Between batches: just report and wait
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
-- Execute coding tasks sequentially in single-flow mode; use `browser_subagent` only for browser tasks; manage background tasks with `run_command`/`manage_task`; and utilize Herdr multi-agent orchestration when `HERDR_ENV=1`.
+- Execute coding tasks sequentially in single-flow mode; use `browser_subagent` only for browser tasks; and manage background tasks with `run_command`/`manage_task`.
 
 ## Integration
 

@@ -43,7 +43,6 @@ const required = [
   "templates/.agents/skills/verification-before-completion/SKILL.md",
   "templates/.agents/skills/writing-plans/SKILL.md",
   "templates/.agents/skills/test-driven-development/SKILL.md",
-  "templates/.agents/skills/herdr/SKILL.md",
   "templates/.agents/skills/nixos-system-rebuild/SKILL.md",
   "templates/.agents/skills/nix-flake-management/SKILL.md",
   "templates/.agents/skills/nix-derivation-debugging/SKILL.md",

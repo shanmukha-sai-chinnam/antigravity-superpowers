@@ -26,10 +26,9 @@ function helpText() {
     "Commands:",
     "  init      Initialize .agents profile in a project (or ~/.gemini/config with --global)",
     "  check     Validate installed Antigravity Superpowers profile integrity",
-    "  doctor    Run diagnostic healthcheck on Nix, Herdr, Node, Git, and AGY environment",
+    "  doctor    Run diagnostic healthcheck on Nix, Node, Git, and AGY environment",
     "  sync      Synchronize latest skills and rules without overwriting custom project files",
-    "  mcp       Model Context Protocol server (tools for NixOS, Herdr, Quotas, Skills)",
-    "  swarm     Herdr multi-agent orchestrator (Trio, Pair, DevOps, Review swarms)",
+    "  mcp       Model Context Protocol server (tools for NixOS, Quotas, Skills)",
     "  watch     Continuous filesystem watcher with automated Nix, Shell, and JS linters",
     "  quota     Inspect Antigravity / Gemini token quotas and reset countdowns",
     "  preset    Scaffold full language/stack profile (NixOS, Web, Rust, Python)",
@@ -39,7 +38,7 @@ function helpText() {
     "  -g, --global   Target global configuration (~/.gemini/config)",
     "  -n, --nix      Include template flake.nix and .envrc for Nix developer shell",
     "  -m, --mcp      Provision declarative MCP server configuration",
-    "      --hooks    Provision lifecycle automation hooks (linting, herdr status, verification)",
+    "      --hooks    Provision lifecycle automation hooks (linting, verification)",
     "  -h, --help     Show help",
   ].join("\n");
 }

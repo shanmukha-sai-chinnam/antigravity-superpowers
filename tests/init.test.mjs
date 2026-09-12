@@ -47,10 +47,10 @@ test("init creates .agents and .agent compatibility symlink in a fresh project",
     const hasLegacyAgent = await pathExists(join(projectDir, ".agent", "AGENTS.md"));
     assert.equal(hasLegacyAgent, true, ".agent/AGENTS.md should exist for compatibility");
 
-    const hasHerdrSkill = await pathExists(
-      join(projectDir, ".agents", "skills", "herdr", "SKILL.md"),
+    const hasInteropSkill = await pathExists(
+      join(projectDir, ".agents", "skills", "nixos-wsl-interop", "SKILL.md"),
     );
-    assert.equal(hasHerdrSkill, true, "herdr skill should be installed");
+    assert.equal(hasInteropSkill, true, "nixos-wsl-interop skill should be installed");
 
     const hasNixSkill = await pathExists(
       join(projectDir, ".agents", "skills", "nixos-system-rebuild", "SKILL.md"),
@@ -175,10 +175,10 @@ test("init --global installs to GEMINI_CONFIG_DIR", async () => {
     });
     assert.equal(result.status, 0);
 
-    const hasHerdr = await pathExists(
-      join(globalDir, "skills", "herdr", "SKILL.md"),
+    const hasInterop = await pathExists(
+      join(globalDir, "skills", "nixos-wsl-interop", "SKILL.md"),
     );
-    assert.equal(hasHerdr, true, "global herdr skill should exist");
+    assert.equal(hasInterop, true, "global nixos-wsl-interop skill should exist");
 
     const hasNixSkill = await pathExists(
       join(globalDir, "skills", "nixos-system-rebuild", "SKILL.md"),
@@ -202,7 +202,7 @@ test("mcp tools command lists available tools", async () => {
   assert.equal(result.status, 0);
   assert.match(result.stdout, /nixos_generation_info/);
   assert.match(result.stdout, /nixos_service_status/);
-  assert.match(result.stdout, /herdr_pane_list/);
+  assert.match(result.stdout, /superpowers_skill_read/);
   assert.match(result.stdout, /antigravity_quota_info/);
 });
 
@@ -213,11 +213,10 @@ test("mcp config command prints declarative server snippet", async () => {
   assert.ok(parsed.mcpServers["antigravity-superpowers"]);
 });
 
-test("swarm help command prints preset information", async () => {
+test("swarm help command prints deprecation information", async () => {
   const result = runCli(["swarm", "--help"]);
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /trio/);
-  assert.match(result.stdout, /devops/);
+  assert.match(result.stdout, /Planning Mode/);
 });
 
 test("swarm status command reports session state", async () => {

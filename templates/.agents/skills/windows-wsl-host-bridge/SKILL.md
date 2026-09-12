@@ -64,7 +64,7 @@ open_windows_url "http://localhost:5173"
 
 ## Windows Terminal Integration
 
-To launch directly into NixOS-WSL with the Herdr persistent session, configure the Windows Terminal profile (`settings.json`):
+To launch directly into NixOS-WSL, configure the Windows Terminal profile (`settings.json`):
 
 ```json
 {

@@ -3,23 +3,21 @@
 This document details the architecture and evolution between:
 
 - Original skill set: `skills/` (designed for Claude Code)
-- Modern Antigravity Superpowers: `templates/.agents/` + CLI + Nix Flake + Herdr Orchestration
+- Modern Antigravity Superpowers: `templates/.agents/` + CLI + Nix Flake + Native Planning Mode
 
 ---
 
 ## 1) High-Level Architecture & Evolution
 
-- **Skill Count**: Expanded from **14** (original) to **23 specialized skills**:
+- **Skill Count**: Expanded from **14** (original) to **21 specialized skills**:
   - 14 Core Process & Quality skills ported and normalized for Antigravity 2.0.
   - 4 NixOS & Flake systems engineering skills (`nixos-system-rebuild`, `nix-flake-management`, `nix-derivation-debugging`, `nix-code-audit`).
-  - 2 Herdr & Swarm orchestration skills (`herdr`, `herdr-multi-agent-orchestration`).
   - 1 Model Context Protocol skill (`antigravity-mcp-integration`).
   - 1 Real-time verification skill (`continuous-codebase-watching`).
   - 2 NixOS-WSL & Host interoperability skills (`nixos-wsl-interop`, `windows-wsl-host-bridge`).
 - **Discovery Roots**: Migrated to `.agents/` as primary root (with `.agent/` backward compatibility). Global root is `~/.gemini/config/`.
 - **Execution Model**:
-  - Single-agent tasks leverage Antigravity Planning Mode (`implementation_plan.md`, `walkthrough.md`).
-  - Multi-agent swarms leverage **Herdr** (`herdr pane split`, `herdr agent start`) for parallel worker and reviewer execution (zero tmux dependencies).
+  - Single-agent tasks leverage Antigravity Planning Mode (`implementation_plan.md`, `walkthrough.md`) with disciplined Single-Flow execution.
 - **Task Tracking**:
   - Legacy `TodoWrite` replaced with native Planning Mode artifacts or project-root `<project-root>/.agents/task.md`.
 - **Platform & Tool Vocabulary Translation**:
@@ -38,9 +36,7 @@ This document details the architecture and evolution between:
 | `brainstorming` | Process | Preserved, path normalized |
 | `writing-plans` | Process | Uses Antigravity Planning Mode & artifacts |
 | `executing-plans` | Execution | Integrated with single-flow discipline |
-| `single-flow-task-execution` | Execution | **New** — Merges `dispatching-parallel-agents` & `subagent-driven-development` |
-| `herdr` | Orchestration | **New** — Terminal multiplexing & agent management |
-| `herdr-multi-agent-orchestration` | Orchestration | **New** — Trio Architecture (Architect, Implementer, Watcher) |
+| `single-flow-task-execution` | Execution | **New** — Disciplined task execution with review gates |
 | `antigravity-mcp-integration` | Protocol | **New** — STDIO JSON-RPC 2.0 Model Context Protocol |
 | `continuous-codebase-watching` | Verifier | **New** — Sub-second automated linter & test feedback daemon |
 | `nixos-system-rebuild` | Systems | **New** — Pre-flight checks, 5-stage validation, closure diffs, rollback |
@@ -66,7 +62,7 @@ This document details the architecture and evolution between:
 | Original Claude Code Tool | Antigravity Native Equivalent |
 | :--- | :--- |
 | `Skill` | `view_file` |
-| `Task` (coding subagent) | Herdr multi-agent pane or Planning Mode task breakdown |
+| `Task` (coding subagent) | Planning Mode task breakdown (`implementation_plan.md`) |
 | `Task` (browser) | `browser_subagent` |
 | `Bash` | `run_command` |
 | `Glob` / `Grep` | `grep_search` (ripgrep) |

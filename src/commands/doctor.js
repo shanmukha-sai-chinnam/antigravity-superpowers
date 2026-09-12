@@ -70,21 +70,7 @@ export async function doctorCommand(args, { cwd, stdout, stderr }) {
     report("WARN", "Nix Toolchain", "Nix not found in PATH");
   }
 
-  // 4. Herdr Multiplexer
-  const herdrCheck = runCheck("herdr", ["--version"]);
-  if (herdrCheck.ok) {
-    report("PASS", "Herdr Multiplexer", herdrCheck.output);
-    const herdrIntegrations = runCheck("herdr", ["integration", "status"]);
-    if (herdrIntegrations.ok) {
-      report("PASS", "Herdr Agent Hooks", "Agent integrations active");
-    } else {
-      report("WARN", "Herdr Agent Hooks", "Run 'herdr integration install' to register hooks");
-    }
-  } else {
-    report("WARN", "Herdr Multiplexer", "Herdr not installed (multi-agent swarms disabled)");
-  }
-
-  // 5. Antigravity / Gemini CLI
+  // 4. Antigravity / Gemini CLI
   const agyCheck = runCheck("antigravity-cli", ["--version"]);
   const geminiCheck = runCheck("gemini-cli", ["--version"]);
   if (agyCheck.ok) {

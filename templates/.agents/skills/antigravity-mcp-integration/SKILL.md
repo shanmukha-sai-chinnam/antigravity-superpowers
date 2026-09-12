@@ -1,6 +1,6 @@
 ---
 name: antigravity-mcp-integration
-description: Use when configuring, developing, debugging, or invoking Model Context Protocol (MCP) servers in Antigravity or Herdr. Guides STDIO JSON-RPC 2.0 tool schemas, resource templating, and server diagnostics.
+description: Use when configuring, developing, debugging, or invoking Model Context Protocol (MCP) servers in Antigravity or Gemini. Guides STDIO JSON-RPC 2.0 tool schemas, resource templating, and server diagnostics.
 ---
 
 # Antigravity Model Context Protocol (MCP) Integration Runbook
@@ -13,7 +13,7 @@ Model Context Protocol (MCP) exposes tools, resources, and prompt templates over
 
 ```
 ┌────────────────────────────────────────┐
-│ Antigravity / Gemini / Herdr Agent     │
+│ Antigravity / Gemini Agent             │
 └───────────────────┬────────────────────┘
                     │ JSON-RPC 2.0 (stdio)
 ┌───────────────────▼────────────────────┐

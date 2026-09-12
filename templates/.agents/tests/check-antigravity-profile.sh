@@ -76,12 +76,10 @@ required_skills=(
   "writing-plans"
   "writing-skills"
   "single-flow-task-execution"
-  "herdr"
   "nixos-system-rebuild"
   "nix-flake-management"
   "nix-derivation-debugging"
   "nix-code-audit"
-  "herdr-multi-agent-orchestration"
   "antigravity-mcp-integration"
   "continuous-codebase-watching"
   "nixos-wsl-interop"
@@ -160,7 +158,6 @@ mapping_checks=(
   'schedule'
   'replace_file_content'
   'mcp_\*'
-  'herdr'
 )
 
 for pattern in "${mapping_checks[@]}"; do

@@ -51,6 +51,3 @@ antigravity-superpowers watch --once
 ### JavaScript & TypeScript (`.js`, `.mjs`, `.ts`)
 1. **node --test / npm test**: Runs test suite on code modifications.
 
-## Integration with Herdr Swarm
-
-In a multi-agent Herdr swarm, Pane 3 is dedicated to running `antigravity-superpowers watch`. The implementer agent works in Pane 2 while watching Pane 3 for instant pass/fail signals.
