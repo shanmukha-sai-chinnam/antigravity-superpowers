@@ -14,6 +14,3 @@
 3. **Tool Precision**:
    - Use `replace_file_content` for single contiguous edits and `multi_replace_file_content` for multiple non-contiguous edits.
    - Never use ad-hoc placeholder values or unverified assumptions.
-
-4. **Herdr Multi-Agent Awareness**:
-   - When running in `HERDR_ENV=1`, utilize Herdr for background tasks and multi-agent peer reviews.

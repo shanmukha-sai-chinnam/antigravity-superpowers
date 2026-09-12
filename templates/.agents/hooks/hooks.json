@@ -7,13 +7,7 @@
         "env": {}
       }
     ],
-    "task_state_change": [
-      {
-        "description": "Synchronize active task status into Herdr pane title",
-        "command": "bash .agents/hooks/herdr-status-sync.sh",
-        "env": {}
-      }
-    ],
+
     "pre_completion": [
       {
         "description": "Verify test suite and clean git status before declaring completion",
