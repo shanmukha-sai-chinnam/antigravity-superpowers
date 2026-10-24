@@ -72,13 +72,19 @@ export async function doctorCommand(args, { cwd, stdout, stderr }) {
 
   // 4. Antigravity / Gemini CLI
   const agyCheck = runCheck("antigravity-cli", ["--version"]);
+  const agyBinCheck = runCheck("agy", ["help"]);
   const geminiCheck = runCheck("gemini-cli", ["--version"]);
+  const geminiBinCheck = runCheck("gemini", ["--version"]);
   if (agyCheck.ok) {
     report("PASS", "Antigravity CLI", agyCheck.output);
+  } else if (agyBinCheck.ok) {
+    report("PASS", "Antigravity CLI (agy)", "Active");
   } else if (geminiCheck.ok) {
     report("PASS", "Gemini CLI", geminiCheck.output);
+  } else if (geminiBinCheck.ok) {
+    report("PASS", "Gemini CLI", geminiBinCheck.output);
   } else {
-    report("WARN", "AI Agent CLI", "Neither antigravity-cli nor gemini-cli found in PATH");
+    report("WARN", "AI Agent CLI", "Neither agy, gemini, antigravity-cli nor gemini-cli found in PATH");
   }
 
   // 6. Target Project Profile
